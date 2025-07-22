@@ -1,7 +1,7 @@
 package happy_sb.profiling.instrument.introspection;
 
-import happy_sb.profiling.instrument.tools.Config;
-import happy_sb.profiling.instrument.utils.Pair;
+import happy_sb.profiling.tools.Config;
+import happy_sb.profiling.utils.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

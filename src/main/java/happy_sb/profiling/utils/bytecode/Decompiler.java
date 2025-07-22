@@ -1,8 +1,8 @@
-package happy_sb.profiling.instrument.utils.bytecode;
+package happy_sb.profiling.utils.bytecode;
 
-import happy_sb.profiling.instrument.utils.MethodUtil;
-import happy_sb.profiling.instrument.utils.Pair;
-import happy_sb.profiling.instrument.utils.reflection.ReflectionUtils;
+import happy_sb.profiling.utils.MethodUtil;
+import happy_sb.profiling.utils.Pair;
+import happy_sb.profiling.utils.reflection.ReflectionUtils;
 import org.benf.cfr.reader.api.CfrDriver;
 import org.benf.cfr.reader.api.OutputSinkFactory;
 import org.benf.cfr.reader.api.SinkReturns.LineNumberMapping;

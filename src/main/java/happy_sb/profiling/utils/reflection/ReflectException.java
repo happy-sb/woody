@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package happy_sb.profiling.instrument.utils.reflection;
+package happy_sb.profiling.utils.reflection;
 
 public class ReflectException extends RuntimeException {
 

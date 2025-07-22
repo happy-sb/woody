@@ -1,4 +1,4 @@
-package happy_sb.profiling.instrument.utils;
+package happy_sb.profiling.utils;
 
 import java.util.Objects;
 

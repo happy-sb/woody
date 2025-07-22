@@ -1,7 +1,7 @@
 package happy_sb.profiling.instrument;
 
 
-import happy_sb.profiling.instrument.api.InstrumentationProfiler;
+import happy_sb.profiling.api.InstrumentationProfiler;
 
 import java.lang.reflect.Method;
 

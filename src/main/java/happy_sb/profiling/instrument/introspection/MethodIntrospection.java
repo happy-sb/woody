@@ -1,6 +1,6 @@
 package happy_sb.profiling.instrument.introspection;
 
-import happy_sb.profiling.instrument.utils.Pair;
+import happy_sb.profiling.utils.Pair;
 
 import java.lang.reflect.Method;
 import java.util.*;

@@ -1,9 +1,9 @@
 package happy_sb.profiling.instrument.asm;
 
-import happy_sb.profiling.instrument.tools.Config;
-import happy_sb.profiling.instrument.utils.MethodUtil;
-import happy_sb.profiling.instrument.utils.bytecode.SourceCodeExtractor;
-import happy_sb.profiling.instrument.utils.reflection.ReflectionUtils;
+import happy_sb.profiling.tools.Config;
+import happy_sb.profiling.utils.MethodUtil;
+import happy_sb.profiling.utils.bytecode.SourceCodeExtractor;
+import happy_sb.profiling.utils.reflection.ReflectionUtils;
 import net.bytebuddy.jar.asm.*;
 
 import java.lang.instrument.ClassFileTransformer;

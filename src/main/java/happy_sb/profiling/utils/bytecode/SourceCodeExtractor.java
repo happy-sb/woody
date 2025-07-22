@@ -1,4 +1,4 @@
-package happy_sb.profiling.instrument.utils.bytecode;
+package happy_sb.profiling.utils.bytecode;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

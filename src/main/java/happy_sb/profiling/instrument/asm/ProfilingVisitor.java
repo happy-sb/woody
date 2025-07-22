@@ -2,10 +2,10 @@ package happy_sb.profiling.instrument.asm;
 
 import happy_sb.profiling.instrument.advice.ProfilingAdvice;
 import happy_sb.profiling.instrument.introspection.MethodIntrospection;
-import happy_sb.profiling.instrument.tools.Config;
+import happy_sb.profiling.tools.Config;
 import happy_sb.profiling.instrument.tools.ProfilingEntity;
-import happy_sb.profiling.instrument.utils.MethodUtil;
-import happy_sb.profiling.instrument.utils.Pair;
+import happy_sb.profiling.utils.MethodUtil;
+import happy_sb.profiling.utils.Pair;
 import net.bytebuddy.jar.asm.Label;
 import net.bytebuddy.jar.asm.MethodVisitor;
 import net.bytebuddy.jar.asm.Opcodes;

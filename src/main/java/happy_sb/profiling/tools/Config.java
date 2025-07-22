@@ -1,4 +1,4 @@
-package happy_sb.profiling.instrument.tools;
+package happy_sb.profiling.tools;
 
 import happy_sb.profiling.instrument.introspection.MethodIntrospection;
 import happy_sb.profiling.instrument.introspection.MethodLineOriginalIntrospection;

@@ -1,6 +1,6 @@
-package happy_sb.profiling.instrument.utils;
+package happy_sb.profiling.utils;
 
-import happy_sb.profiling.instrument.utils.reflection.ReflectionUtils;
+import happy_sb.profiling.utils.reflection.ReflectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

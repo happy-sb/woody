@@ -1,6 +1,6 @@
 package happy_sb.profiling.instrument.asm;
 
-import happy_sb.profiling.instrument.utils.MethodUtil;
+import happy_sb.profiling.utils.MethodUtil;
 import net.bytebuddy.jar.asm.*;
 
 import java.lang.instrument.ClassFileTransformer;

@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>happy_sb</groupId>
-    <artifactId>happy-profiler</artifactId>
+    <artifactId>one-profiler</artifactId>
     <version>1.0</version>
 
     <properties>
@@ -50,7 +50,7 @@
                     </descriptorRefs>
                     <archive>
                         <manifestEntries>
-                            <Premain-Class>happy_sb.profiling.HappyProfilerBootstrap</Premain-Class>
+                            <Premain-Class>happy_sb.profiling.OneProfilerBootstrap</Premain-Class>
                             <Can-Redefine-Classes>true</Can-Redefine-Classes>
                             <Can-Retransform-Classes>true</Can-Retransform-Classes>
                         </manifestEntries>

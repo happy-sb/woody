@@ -1,6 +1,6 @@
 package happy_sb.profiling.instrument;
 
-import happy_sb.profiling.instrument.api.InstrumentationProfiler;
+import happy_sb.profiling.api.InstrumentationProfiler;
 import happy_sb.profiling.instrument.stats.MethodProfilingManager;
 import org.junit.Test;
 
