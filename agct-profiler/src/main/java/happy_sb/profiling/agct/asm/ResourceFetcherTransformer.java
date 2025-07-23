@@ -26,6 +26,10 @@ public class ResourceFetcherTransformer implements ClassFileTransformer {
         IgnoredTypesBuilder builder = new IgnoredTypesBuilderImpl();
         builder.allowClass(SPRING_WEB_INSTRUMENTATION_CLASS);
         builder.allowClass(DUBBO_INSTRUMENTATION_CLASS);
+        builder.allowClass(GRPC_INSTRUMENTATION_CLASS);
+        builder.allowClass(ROCKETMQ_INSTRUMENTATION_CLASS_1);
+        builder.allowClass(ROCKETMQ_INSTRUMENTATION_CLASS_2);
+        builder.allowClass(KAFKA_INSTRUMENTATION_CLASS);
         typesPredicate = builder.buildTransformIgnoredPredicate();
     }
 
@@ -38,7 +42,7 @@ public class ResourceFetcherTransformer implements ClassFileTransformer {
         ClassReader reader = new ClassReader(classfileBuffer);
         ClassWriter writer = new ClassWriter(reader, ClassWriter.COMPUTE_FRAMES);
 
-        if (className.equals(SPRING_WEB_INSTRUMENTATION_CLASS)) {
+        if (SPRING_WEB_INSTRUMENTATION_CLASS.equals(className)) {
             reader.accept(new ClassVisitor(Opcodes.ASM7, writer) {
                               @Override
                               public MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
@@ -51,13 +55,67 @@ public class ResourceFetcherTransformer implements ClassFileTransformer {
                           },
                     0);
             return writer.toByteArray();
-        } else if (className.equals(DUBBO_INSTRUMENTATION_CLASS)) {
+        } else if (DUBBO_INSTRUMENTATION_CLASS.equals(className)) {
             reader.accept(new ClassVisitor(Opcodes.ASM7, writer) {
                               @Override
                               public MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
                                   MethodVisitor mv = super.visitMethod(access, name, descriptor, signature, exceptions);
                                   if (DUBBO_INSTRUMENTATION_METHOD.equals(name)) {
                                       return new DubboResourceFetcherVisitor(Opcodes.ASM7, mv);
+                                  }
+                                  return mv;
+                              }
+                          },
+                    0);
+            return writer.toByteArray();
+        } else if (GRPC_INSTRUMENTATION_CLASS.equals(className)) {
+            reader.accept(new ClassVisitor(Opcodes.ASM7, writer) {
+                              @Override
+                              public MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
+                                  MethodVisitor mv = super.visitMethod(access, name, descriptor, signature, exceptions);
+                                  if (GRPC_INSTRUMENTATION_METHOD_1.equals(name) || GRPC_INSTRUMENTATION_METHOD_2.equals(name)) {
+                                      if (descriptor.startsWith("(Lio/grpc/BindableService;")) {
+                                          return new GrpcResourceFetcherVisitor(Opcodes.ASM7, mv);
+                                      }
+                                  }
+                                  return mv;
+                              }
+                          },
+                    0);
+            return writer.toByteArray();
+        } else if (ROCKETMQ_INSTRUMENTATION_CLASS_1.equals(className)) {
+            reader.accept(new ClassVisitor(Opcodes.ASM7, writer) {
+                              @Override
+                              public MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
+                                  MethodVisitor mv = super.visitMethod(access, name, descriptor, signature, exceptions);
+                                  if (ROCKETMQ_INSTRUMENTATION_METHOD_1_1.equals(name) || ROCKETMQ_INSTRUMENTATION_METHOD_1_2.equals(name)) {
+                                      return new RocketMQResourceFetcherVisitor_1(Opcodes.ASM7, mv);
+                                  }
+                                  return mv;
+                              }
+                          },
+                    0);
+            return writer.toByteArray();
+        } else if (ROCKETMQ_INSTRUMENTATION_CLASS_2.equals(className)) {
+            reader.accept(new ClassVisitor(Opcodes.ASM7, writer) {
+                              @Override
+                              public MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
+                                  MethodVisitor mv = super.visitMethod(access, name, descriptor, signature, exceptions);
+                                  if (ROCKETMQ_INSTRUMENTATION_METHOD_2_1.equals(name) || ROCKETMQ_INSTRUMENTATION_METHOD_2_2.equals(name)) {
+                                      return new RocketMQResourceFetcherVisitor_2(Opcodes.ASM7, mv);
+                                  }
+                                  return mv;
+                              }
+                          },
+                    0);
+            return writer.toByteArray();
+        } else if (KAFKA_INSTRUMENTATION_CLASS.equals(className)) {
+            reader.accept(new ClassVisitor(Opcodes.ASM7, writer) {
+                              @Override
+                              public MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
+                                  MethodVisitor mv = super.visitMethod(access, name, descriptor, signature, exceptions);
+                                  if (KAFKA_INSTRUMENTATION_METHOD.equals(name)) {
+                                      return new KafkaResourceFetcherVisitor(Opcodes.ASM7, mv);
                                   }
                                   return mv;
                               }
@@ -104,6 +162,85 @@ public class ResourceFetcherTransformer implements ClassFileTransformer {
                 mv.visitVarInsn(ALOAD, 0);
                 mv.visitMethodInsn(INVOKEVIRTUAL, DUBBO_INSTRUMENTATION_CLASS, "getRef", "()Ljava/lang/Object;", false);
                 mv.visitMethodInsn(INVOKESTATIC, FETCHER_ADVICE_CLASS, DUBBO_FETCHER_METHOD.getName(), MethodUtil.getMethodDescriptor(DUBBO_FETCHER_METHOD), false);
+                visited = true;
+            }
+            super.visitLineNumber(line, start);
+        }
+    }
+
+    private class GrpcResourceFetcherVisitor extends MethodVisitor {
+
+        private boolean visited = false;
+
+        protected GrpcResourceFetcherVisitor(int api, MethodVisitor methodVisitor) {
+            super(api, methodVisitor);
+        }
+
+        @Override
+        public void visitLineNumber(int line, Label start) {
+            if (!visited) {
+                mv.visitVarInsn(ALOAD, 0);
+                mv.visitMethodInsn(INVOKESTATIC, FETCHER_ADVICE_CLASS, GRPC_FETCHER_METHOD.getName(), MethodUtil.getMethodDescriptor(GRPC_FETCHER_METHOD), false);
+                visited = true;
+            }
+            super.visitLineNumber(line, start);
+        }
+    }
+
+    private class RocketMQResourceFetcherVisitor_1 extends MethodVisitor {
+
+        private boolean visited = false;
+
+        protected RocketMQResourceFetcherVisitor_1(int api, MethodVisitor methodVisitor) {
+            super(api, methodVisitor);
+        }
+
+        @Override
+        public void visitLineNumber(int line, Label start) {
+            if (!visited) {
+                mv.visitVarInsn(ALOAD, 0);
+                mv.visitVarInsn(ALOAD, 1);
+                mv.visitMethodInsn(INVOKESTATIC, FETCHER_ADVICE_CLASS, ROCKETMQ_FETCHER_METHOD_1.getName(), MethodUtil.getMethodDescriptor(ROCKETMQ_FETCHER_METHOD_1), false);
+                visited = true;
+            }
+            super.visitLineNumber(line, start);
+        }
+    }
+
+    private class RocketMQResourceFetcherVisitor_2 extends MethodVisitor {
+
+        private boolean visited = false;
+
+        protected RocketMQResourceFetcherVisitor_2(int api, MethodVisitor methodVisitor) {
+            super(api, methodVisitor);
+        }
+
+        @Override
+        public void visitLineNumber(int line, Label start) {
+            if (!visited) {
+                mv.visitVarInsn(ALOAD, 0);
+                mv.visitVarInsn(ALOAD, 1);
+                mv.visitMethodInsn(INVOKESTATIC, FETCHER_ADVICE_CLASS, ROCKETMQ_FETCHER_METHOD_2.getName(), MethodUtil.getMethodDescriptor(ROCKETMQ_FETCHER_METHOD_2), false);
+                visited = true;
+            }
+            super.visitLineNumber(line, start);
+        }
+    }
+
+    private class KafkaResourceFetcherVisitor extends MethodVisitor {
+
+        private boolean visited = false;
+
+        protected KafkaResourceFetcherVisitor(int api, MethodVisitor methodVisitor) {
+            super(api, methodVisitor);
+        }
+
+        @Override
+        public void visitLineNumber(int line, Label start) {
+            if (!visited) {
+                mv.visitVarInsn(ALOAD, 1);
+                mv.visitVarInsn(ALOAD, 2);
+                mv.visitMethodInsn(INVOKESTATIC, FETCHER_ADVICE_CLASS, KAFKA_FETCHER_METHOD.getName(), MethodUtil.getMethodDescriptor(KAFKA_FETCHER_METHOD), false);
                 visited = true;
             }
             super.visitLineNumber(line, start);

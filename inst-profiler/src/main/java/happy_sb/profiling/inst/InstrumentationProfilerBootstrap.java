@@ -18,7 +18,6 @@ import java.lang.instrument.Instrumentation;
 public class InstrumentationProfilerBootstrap {
     public static void premain(String agentArgs, Instrumentation inst) {
         InstrumentationUtils.setInstrumentation(inst);
-//        inst.addTransformer(new ResourceFetcherTransformer());
         InstrumentationProfiler.INSTANCE_REFERENCE.set(new InstrumentationProfilingProcessor());
     }
 }

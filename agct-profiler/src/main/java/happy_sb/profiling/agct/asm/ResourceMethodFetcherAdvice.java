@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.Collection;
 import java.util.Map;
 
 /**
@@ -30,9 +31,32 @@ public class ResourceMethodFetcherAdvice {
     public static final String DUBBO_INSTRUMENTATION_METHOD = "doExport";
     public static final String DUBBO_INSTRUMENTATION_CLASS = "org.apache.dubbo.config.ServiceConfig".replace(".", "/");
 
+    public static final Method GRPC_FETCHER_METHOD;
+    public static final String GRPC_INSTRUMENTATION_METHOD_1 = "intercept";
+    public static final String GRPC_INSTRUMENTATION_METHOD_2 = "interceptForward";
+    public static final String GRPC_INSTRUMENTATION_CLASS = "io.grpc.ServerInterceptors".replace(".", "/");
+
+    public static final Method ROCKETMQ_FETCHER_METHOD_1;
+    public static final String ROCKETMQ_INSTRUMENTATION_METHOD_1_1 = "setRocketMQListener";
+    public static final String ROCKETMQ_INSTRUMENTATION_METHOD_1_2 = "setRocketMQReplyListener";
+    public static final String ROCKETMQ_INSTRUMENTATION_CLASS_1 = "org.apache.rocketmq.spring.support.DefaultRocketMQListenerContainer".replace(".", "/");
+
+    public static final Method ROCKETMQ_FETCHER_METHOD_2;
+    public static final String ROCKETMQ_INSTRUMENTATION_METHOD_2_1 = "setMessageListener";
+    public static final String ROCKETMQ_INSTRUMENTATION_METHOD_2_2 = "registerMessageListener";
+    public static final String ROCKETMQ_INSTRUMENTATION_CLASS_2 = "org.apache.rocketmq.client.consumer.DefaultMQPushConsumer".replace(".", "/");
+
+    public static final Method KAFKA_FETCHER_METHOD;
+    public static final String KAFKA_INSTRUMENTATION_METHOD = "processKafkaListener";
+    public static final String KAFKA_INSTRUMENTATION_CLASS = "org.springframework.kafka.annotation.KafkaListenerAnnotationBeanPostProcessor".replace(".", "/");
+
     static {
         SPRING_WEB_FETCHER_METHOD = ReflectionUtils.findMethod(ResourceMethodFetcherAdvice.class, "fetchSpringWebProfilingResources", Map.class);
         DUBBO_FETCHER_METHOD = ReflectionUtils.findMethod(ResourceMethodFetcherAdvice.class, "fetchDubboProfilingResource", Class.class, Object.class);
+        GRPC_FETCHER_METHOD = ReflectionUtils.findMethod(ResourceMethodFetcherAdvice.class, "fetchGrpcProfilingResource", Object.class);
+        ROCKETMQ_FETCHER_METHOD_1 = ReflectionUtils.findMethod(ResourceMethodFetcherAdvice.class, "fetchRocketMQProfilingResources_1", Object.class, Object.class);
+        ROCKETMQ_FETCHER_METHOD_2 = ReflectionUtils.findMethod(ResourceMethodFetcherAdvice.class, "fetchRocketMQProfilingResources_2", Object.class, Object.class);
+        KAFKA_FETCHER_METHOD = ReflectionUtils.findMethod(ResourceMethodFetcherAdvice.class, "fetchKafkaProfilingResource", Annotation.class, Method.class);
     }
 
     public static void fetchSpringWebProfilingResources(Map<?, ?> handlerMethods) {
@@ -57,15 +81,35 @@ public class ResourceMethodFetcherAdvice {
         AGCTProfilerManager.getProfilingResources().addApacheDubboResources(type, obj.getClass().getName());
     }
 
-    public static void fetchGrpcTracingResource(String fullName, Class type) {
-        AGCTProfilerManager.getProfilingResources().addGrpcResources(fullName, type);
+    public static void fetchGrpcProfilingResource(Object bindableService) {
+        Object definition = ReflectionUtils.invoke(bindableService, "bindService");
+        if (definition == null) {
+            return;
+        }
+        Collection methodDefinitions = ReflectionUtils.invoke(definition, "getMethods");
+        for (Object methodDefinition : methodDefinitions) {
+            Object descriptor = ReflectionUtils.invoke(methodDefinition, "getMethodDescriptor");
+            String fullName = ReflectionUtils.invoke(descriptor, "getFullMethodName");
+            Class type = bindableService.getClass();
+            AGCTProfilerManager.getProfilingResources().addGrpcResources(fullName, type);
+        }
     }
 
-    public static void fetchRocketMQProfilingResources(String topic, Class type, String method) {
-        AGCTProfilerManager.getProfilingResources().addRocketMQResource(topic, type, method);
+    public static void fetchRocketMQProfilingResources_1(Object container, Object listener) {
+        String topic = ReflectionUtils.invoke(container, "getTopic");
+        Class<?> type = listener.getClass();
+        AGCTProfilerManager.getProfilingResources().addRocketMQResource(topic, type, "onMessage");
     }
 
-    public static void fetchKafkaListener(Annotation kafkaListener, Method method) {
+    public static void fetchRocketMQProfilingResources_2(Object consumer, Object listener) {
+        Object innerConsumer = ReflectionUtils.get(consumer, "defaultMQPushConsumerImpl");
+        Object rebalance = ReflectionUtils.invoke(innerConsumer, "getRebalanceImpl");
+        Map<String, ?> topics = ReflectionUtils.invoke(rebalance, "getSubscriptionInner");
+        AGCTProfilerManager.getProfilingResources().addRocketMQResource(
+                String.join(",", topics.keySet()), listener.getClass(), "consumeMessage");
+    }
+
+    public static void fetchKafkaProfilingResource(Annotation kafkaListener, Method method) {
         String[] topics = null;
         if (kafkaListener instanceof Proxy && ReflectionUtils.existsField(kafkaListener, "h")) {
             Object handler = ReflectionUtils.get(kafkaListener, "h");
@@ -78,9 +122,7 @@ public class ResourceMethodFetcherAdvice {
             return;
         }
         ProfilingResources profilingResources = AGCTProfilerManager.getProfilingResources();
-        for (String topic : topics) {
-            profilingResources.addKafkaResource(topic, method);
-        }
+        profilingResources.addKafkaResource(String.join(",", topics), method);
     }
 
 
