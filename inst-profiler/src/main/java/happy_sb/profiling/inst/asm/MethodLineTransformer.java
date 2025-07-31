@@ -3,7 +3,7 @@ package happy_sb.profiling.inst.asm;
 import happy_sb.profiler.util.MethodUtil;
 import happy_sb.profiler.util.bytecode.SourceCodeExtractor;
 import happy_sb.profiler.util.reflection.ReflectionUtils;
-import happy_sb.profiling.inst.core.Config;
+import happy_sb.profiling.api.Config;
 import net.bytebuddy.jar.asm.*;
 
 import java.lang.instrument.ClassFileTransformer;

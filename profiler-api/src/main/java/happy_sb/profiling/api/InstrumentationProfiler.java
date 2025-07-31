@@ -1,4 +1,4 @@
-package happy_sb.profiling.inst.api;
+package happy_sb.profiling.api;
 
 import java.lang.reflect.Method;
 import java.util.Set;

@@ -1,4 +1,4 @@
-package happy_sb.profiling.agct.tool;
+package happy_sb.profiling.agct.tracing;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +29,7 @@ public class ProfilingTraces {
     this.traceList.add(trace);
   }
 
-  public ProfilingSpan startProfilingSpan(long spanId, long time, String operationName) {
+  public ProfilingSpan startProfilingSpan(Object spanId, long time, String operationName) {
     if (traceList.isEmpty()) {
       return null;
     }

@@ -3,7 +3,7 @@ package happy_sb.profiling.inst;
 
 
 import happy_sb.profiler.util.bytecode.InstrumentationUtils;
-import happy_sb.profiling.inst.api.InstrumentationProfiler;
+import happy_sb.profiling.api.InstrumentationProfiler;
 import happy_sb.profiling.inst.core.InstrumentationProfilingProcessor;
 
 import java.lang.instrument.Instrumentation;

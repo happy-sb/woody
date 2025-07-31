@@ -1,14 +1,14 @@
-package happy_sb.profiling.agct.tool;
+package happy_sb.profiling.agct.tracing;
 
 public class ProfilingSpan {
-  private String traceId;
-  private long spanId;
+  private Object traceId;
+  private Object spanId;
   private long startTime;
   private String operation;
   private String rootMethod;
   private long endTime;
 
-  public ProfilingSpan(String traceId, long spanId, long startTime, String operationName, String resource) {
+  public ProfilingSpan(Object traceId, Object spanId, long startTime, String operationName, String resource) {
     this.traceId = traceId;
     this.spanId = spanId;
     this.startTime = startTime;
@@ -16,7 +16,7 @@ public class ProfilingSpan {
     this.rootMethod = resource;
   }
 
-  public long getSpanId() {
+  public Object getSpanId() {
     return spanId;
   }
 
@@ -48,7 +48,7 @@ public class ProfilingSpan {
     this.operation = operation;
   }
 
-  public String getTraceId() {
+  public Object getTraceId() {
     return traceId;
   }
 

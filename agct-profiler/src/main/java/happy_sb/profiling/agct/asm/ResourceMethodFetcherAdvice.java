@@ -2,7 +2,8 @@ package happy_sb.profiling.agct.asm;
 
 import happy_sb.profiler.util.reflection.ReflectionUtils;
 import happy_sb.profiling.agct.core.AGCTProfilerManager;
-import happy_sb.profiling.agct.tool.ProfilingResources;
+import happy_sb.profiling.agct.tool.TracingMethodTrigger;
+import happy_sb.profiling.agct.tool.TracingResources;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -10,7 +11,9 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author jiangjibo
@@ -61,6 +64,7 @@ public class ResourceMethodFetcherAdvice {
 
     public static void fetchSpringWebProfilingResources(Map<?, ?> handlerMethods) {
         try {
+            Set<Class> classes = new HashSet<>();
             for (Map.Entry<?, ?> entry : handlerMethods.entrySet()) {
                 Object mappingInfo = entry.getKey();
                 String path = mappingInfo.toString();
@@ -70,10 +74,15 @@ public class ResourceMethodFetcherAdvice {
                 }
                 Object handlerMethod = entry.getValue();
                 Method method = ReflectionUtils.get(handlerMethod, "method");
-                AGCTProfilerManager.getProfilingResources().addHttpResources(path, method.getClass().getName() + "." + method.getName(), method);
+                AGCTProfilerManager.getProfilingResources().addHttpResources(path, method);
+                Class<?> clazz = method.getDeclaringClass();
+                if (!clazz.getName().startsWith("org.springframework")) {
+                    classes.add(clazz);
+                }
             }
+            TracingMethodTrigger.addTracingClass(classes.toArray(new Class[0]));
         } catch (Exception e) {
-            log.error("Fetch http profiling resource occur exception", e);
+            log.error("One-Profiler: Fetch http profiling resource occur exception", e);
         }
     }
 
@@ -121,7 +130,7 @@ public class ResourceMethodFetcherAdvice {
         if (topics == null) {
             return;
         }
-        ProfilingResources profilingResources = AGCTProfilerManager.getProfilingResources();
+        TracingResources profilingResources = AGCTProfilerManager.getProfilingResources();
         profilingResources.addKafkaResource(String.join(",", topics), method);
     }
 

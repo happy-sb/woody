@@ -2,8 +2,8 @@ package happy_sb.profiling.inst.advice;
 
 import happy_sb.profiler.util.MethodUtil;
 import happy_sb.profiler.util.reflection.ReflectionUtils;
-import happy_sb.profiling.inst.core.Config;
-import happy_sb.profiling.inst.introspection.MethodIntrospection;
+import happy_sb.profiling.api.Config;
+import happy_sb.profiling.api.MethodIntrospection;
 import happy_sb.profiling.inst.stats.MethodProfilingManager;
 import happy_sb.profiling.inst.tools.ProfilingEntity;
 import org.slf4j.Logger;

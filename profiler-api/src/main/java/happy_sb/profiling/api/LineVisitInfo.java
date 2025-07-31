@@ -1,4 +1,4 @@
-package happy_sb.profiling.inst.introspection;
+package happy_sb.profiling.api;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;

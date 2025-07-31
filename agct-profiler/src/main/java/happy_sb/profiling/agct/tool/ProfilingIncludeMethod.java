@@ -1,57 +1,75 @@
 package happy_sb.profiling.agct.tool;
 
 
-
 import happy_sb.profiler.util.MethodUtil;
+import happy_sb.profiling.api.id.IdGenerator;
 
 import java.lang.reflect.Method;
 
 public class ProfilingIncludeMethod {
     private Class clazz;
     private String methodName;
-    private String signature;
+    private String descriptor;
+
+    private Method method;
+
+    private String methodPath;
     /**
      * http, dubbo, task等
      */
     private String resourceType;
+    private String resource;
 
-    public ProfilingIncludeMethod(String resourceType, Method method) {
+    private IdGenerator idGenerator;
+
+    public ProfilingIncludeMethod(String resourceType, String resource, Method method) {
+        this(resourceType, resource, method, IdGenerator.INSTANCE);
+    }
+
+    public ProfilingIncludeMethod(String resourceType, String resource, Method method, IdGenerator idGenerator) {
         this.resourceType = resourceType;
+        this.resource = resource;
         this.methodName = method.getName();
+        this.method = method;
+        this.methodPath = method.getDeclaringClass().getName() + "." + method.getName();
         this.clazz = method.getDeclaringClass();
-        this.signature = MethodUtil.getMethodDescriptor(method);
+        this.descriptor = MethodUtil.getMethodDescriptor(method);
+        this.idGenerator = idGenerator;
     }
 
     public Class getClazz() {
         return clazz;
     }
 
-    public void setClazz(Class clazz) {
-        this.clazz = clazz;
-    }
 
     public String getMethodName() {
         return methodName;
     }
 
-    public void setMethodName(String methodName) {
-        this.methodName = methodName;
-    }
 
     public String getSignature() {
-        return signature;
+        return descriptor;
     }
 
-    public void setSignature(String signature) {
-        this.signature = signature;
-    }
 
     public String getResourceType() {
         return resourceType;
     }
 
-    public void setResourceType(String resourceType) {
-        this.resourceType = resourceType;
+
+    public IdGenerator getIdGenerator() {
+        return idGenerator;
     }
 
+    public String getResource() {
+        return resource;
+    }
+
+    public Method getMethod() {
+        return method;
+    }
+
+    public String getMethodPath() {
+        return methodPath;
+    }
 }

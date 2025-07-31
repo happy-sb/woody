@@ -1,8 +1,6 @@
-package happy_sb.profiling.inst.core;
+package happy_sb.profiling.api;
 
 
-import happy_sb.profiling.inst.introspection.MethodIntrospection;
-import happy_sb.profiling.inst.introspection.MethodLineOriginalIntrospection;
 
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.Method;
@@ -59,7 +57,7 @@ public class Config {
         return introspectedClassMethods.containsKey(clazz) && introspectedClassMethods.get(clazz).contains(method);
     }
 
-    public void addMethodLineIntrospection(Method method, MethodLineOriginalIntrospection endpoint) {
+    public void addMethodLineIntrospection(Method method, MethodIntrospection endpoint) {
         introspectedClassMethods.computeIfAbsent(method.getDeclaringClass(), new Function<Class, Set<Method>>() {
             @Override
             public Set<Method> apply(Class aClass) {

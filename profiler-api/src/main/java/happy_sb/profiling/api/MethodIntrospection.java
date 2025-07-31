@@ -1,4 +1,4 @@
-package happy_sb.profiling.inst.introspection;
+package happy_sb.profiling.api;
 
 
 import happy_sb.profiler.util.Pair;

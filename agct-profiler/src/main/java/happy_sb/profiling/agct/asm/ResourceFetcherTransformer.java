@@ -1,9 +1,7 @@
 package happy_sb.profiling.agct.asm;
 
 import happy_sb.profiler.util.MethodUtil;
-import happy_sb.profiler.util.ignore.IgnoredTypesBuilder;
-import happy_sb.profiler.util.ignore.IgnoredTypesBuilderImpl;
-import happy_sb.profiler.util.ignore.IgnoredTypesPredicate;
+import happy_sb.profiling.agct.tool.AGCTPredicate;
 import net.bytebuddy.jar.asm.*;
 
 import java.lang.instrument.ClassFileTransformer;
@@ -20,22 +18,9 @@ import static net.bytebuddy.jar.asm.Opcodes.*;
 public class ResourceFetcherTransformer implements ClassFileTransformer {
 
 
-    private IgnoredTypesPredicate typesPredicate;
-
-    public ResourceFetcherTransformer() {
-        IgnoredTypesBuilder builder = new IgnoredTypesBuilderImpl();
-        builder.allowClass(SPRING_WEB_INSTRUMENTATION_CLASS);
-        builder.allowClass(DUBBO_INSTRUMENTATION_CLASS);
-        builder.allowClass(GRPC_INSTRUMENTATION_CLASS);
-        builder.allowClass(ROCKETMQ_INSTRUMENTATION_CLASS_1);
-        builder.allowClass(ROCKETMQ_INSTRUMENTATION_CLASS_2);
-        builder.allowClass(KAFKA_INSTRUMENTATION_CLASS);
-        typesPredicate = builder.buildTransformIgnoredPredicate();
-    }
-
     @Override
     public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classfileBuffer) {
-        if (!typesPredicate.test(loader, className)) {
+        if (!AGCTPredicate.acceptResourceFetching(loader, className)) {
             return null;
         }
 

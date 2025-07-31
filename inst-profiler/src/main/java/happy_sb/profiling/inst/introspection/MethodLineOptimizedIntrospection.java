@@ -1,7 +1,9 @@
 package happy_sb.profiling.inst.introspection;
 
 import happy_sb.profiler.util.Pair;
-import happy_sb.profiling.inst.core.Config;
+import happy_sb.profiling.api.Config;
+import happy_sb.profiling.api.LineVisitInfo;
+import happy_sb.profiling.api.MethodIntrospection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

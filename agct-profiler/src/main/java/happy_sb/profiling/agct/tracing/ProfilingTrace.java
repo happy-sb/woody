@@ -1,4 +1,4 @@
-package happy_sb.profiling.agct.tool;
+package happy_sb.profiling.agct.tracing;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -7,19 +7,21 @@ public class ProfilingTrace {
 
   private String resource;
   private String type;
-  private String traceId;
+  private String methodPath;
+  private Object traceId;
   private long startTime;
   private long endTime;
   private List<ProfilingSpan> spanList = new ArrayList<>();
 
-  public ProfilingTrace(String resource, String type, String traceId, long startTime) {
+  public ProfilingTrace(String resource, String type, String methodPath, Object traceId) {
     this.resource = resource;
     this.type = type;
+    this.methodPath = methodPath;
     this.traceId = traceId;
-    this.startTime = startTime;
+    this.startTime = System.nanoTime();
   }
 
-  public ProfilingSpan startSpan(long spanId, long startTime, String operationName) {
+  public ProfilingSpan startSpan(Object spanId, long startTime, String operationName) {
     if (endTime > 0) {
       return null;
     }
@@ -28,11 +30,11 @@ public class ProfilingTrace {
     return span;
   }
 
-  public void finish(long endTime) {
-    this.endTime = endTime;
+  public void finish() {
+    this.endTime = System.nanoTime();
   }
 
-  public String getTraceId() {
+  public Object getTraceId() {
     return traceId;
   }
 
