@@ -1,8 +1,8 @@
 package happy_sb.profiling.agct.core;
 
-import happy_sb.profiling.agct.tracing.ProfilingSpan;
-import happy_sb.profiling.agct.tracing.ProfilingTrace;
-import happy_sb.profiling.agct.tracing.ProfilingTraces;
+import happy_sb.profiling.agct.trace.ProfilingSpan;
+import happy_sb.profiling.agct.trace.ProfilingTrace;
+import happy_sb.profiling.agct.trace.ProfilingTraces;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

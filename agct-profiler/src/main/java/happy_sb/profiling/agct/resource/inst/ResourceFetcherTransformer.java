@@ -1,4 +1,4 @@
-package happy_sb.profiling.agct.asm;
+package happy_sb.profiling.agct.resource.inst;
 
 import happy_sb.profiler.util.MethodUtil;
 import happy_sb.profiling.agct.tool.AGCTPredicate;
@@ -7,7 +7,7 @@ import net.bytebuddy.jar.asm.*;
 import java.lang.instrument.ClassFileTransformer;
 import java.security.ProtectionDomain;
 
-import static happy_sb.profiling.agct.asm.ResourceMethodFetcherAdvice.*;
+import static happy_sb.profiling.agct.constant.ResourceFetchingTargets.*;
 import static net.bytebuddy.jar.asm.Opcodes.*;
 
 /**

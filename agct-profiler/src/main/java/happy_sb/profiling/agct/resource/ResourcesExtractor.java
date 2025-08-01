@@ -1,5 +1,6 @@
-package happy_sb.profiling.agct.tool;
+package happy_sb.profiling.agct.resource;
 
+import happy_sb.profiling.agct.resource.inst.InstResourceFetcher;
 import happy_sb.profiling.api.id.IdGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,23 +12,20 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-public class TracingResources {
+public class ResourcesExtractor {
 
-    private static final Logger log = LoggerFactory.getLogger(TracingResources.class);
+    private static final Logger log = LoggerFactory.getLogger(ResourcesExtractor.class);
 
-    private Map<String, String> resources = new ConcurrentHashMap<>();
+    private static Map<String, String> resources = new ConcurrentHashMap<>();
 
-    public TracingResources() {
-    }
-
-    public void addHttpResources(String resource, Method method) {
+    public static void extractHttpResources(String resource, Method method) {
         String methodPath = method.getDeclaringClass().getName() + "." + method.getName();
         if (resources.putIfAbsent(resource, methodPath) == null) {
-            ProfilingIncludeMethods.addProfilingIncludeMethod(new ProfilingIncludeMethod("http", resource, method));
+            InstResourceFetcher.INSTANCE.transformTracingMethod(new ResourceMethod("http", resource, method));
         }
     }
 
-    public void addGrpcResources(String fullName, Class type) {
+    public static void extractGrpcResources(String fullName, Class type) {
         for (Method method : type.getDeclaredMethods()) {
             Class<?>[] parameterTypes = method.getParameterTypes();
             if (parameterTypes.length == 2 && parameterTypes[1].getName().equals("io.grpc.stub.StreamObserver")) {
@@ -37,13 +35,12 @@ public class TracingResources {
                     return;
                 }
                 resources.put(resource, methodPath);
-                ProfilingIncludeMethods.addProfilingIncludeMethod(new ProfilingIncludeMethod("grpc", resource, method));
+                InstResourceFetcher.INSTANCE.transformTracingMethod(new ResourceMethod("grpc", resource, method));
             }
         }
-        TracingMethodTrigger.addTracingClass(new Class[]{type});
     }
 
-    public void addApacheDubboResources(Class type, String implement) {
+    public static void extractApacheDubboResources(Class type, String implement) {
         if (implement.startsWith("org.apache.dubbo.") || implement.startsWith("com.alibaba.dubbo.")) {
             return;
         }
@@ -57,16 +54,15 @@ public class TracingResources {
                 }
                 resources.put(resource, methodPath);
                 Method m = implementClass.getDeclaredMethod(method.getName(), method.getParameterTypes());
-                ProfilingIncludeMethods.addProfilingIncludeMethod(new ProfilingIncludeMethod("dubbo", resource, m));
+                InstResourceFetcher.INSTANCE.transformTracingMethod(new ResourceMethod("dubbo", resource, m));
             }
-            TracingMethodTrigger.addTracingClass(new Class[]{implementClass});
         } catch (Exception e) {
             log.error("Load dubbo class failed!", e);
         }
     }
 
 
-    public void addRocketMQResource(String topic, Class type, String method) {
+    public static void extractRocketMQResource(String topic, Class type, String method) {
         String typeName = type.getName();
         if (typeName.startsWith("org.apache.rocketmq.spring.support.DefaultRocketMQListenerContainer")) {
             return;
@@ -77,31 +73,28 @@ public class TracingResources {
             return;
         }
         resources.put(resource, methodPath);
-        ProfilingIncludeMethods.addProfilingIncludeMethod(new ProfilingIncludeMethod("rocketmq", resource, findMostApplicableMethod(type, method)));
-        TracingMethodTrigger.addTracingClass(new Class[]{type});
+        InstResourceFetcher.INSTANCE.transformTracingMethod(new ResourceMethod("rocketmq", resource, findMostApplicableMethod(type, method)));
     }
 
-    public void addKafkaResource(String topic, Method method) {
+    public static void extractKafkaResource(String topic, Method method) {
         String methodPath = method.getDeclaringClass().getName() + "." + method.getName();
         String resource = "Consume Topic " + topic;
         if (resources.containsKey(resource)) {
             return;
         }
         resources.put(resource, methodPath);
-        ProfilingIncludeMethods.addProfilingIncludeMethod(new ProfilingIncludeMethod("kafka", resource, method));
-        TracingMethodTrigger.addTracingClass(new Class[]{method.getDeclaringClass()});
+        InstResourceFetcher.INSTANCE.transformTracingMethod(new ResourceMethod("kafka", resource, method));
     }
 
-    public void addCustomResource(String resource, String type, Method method, IdGenerator idGenerator) {
+    public static void addCustomResource(String resource, String type, Method method, IdGenerator idGenerator) {
         if (resources.containsKey(resource)) {
             return;
         }
         resources.put(resource, type + "." + method.getName());
-        ProfilingIncludeMethods.addProfilingIncludeMethod(new ProfilingIncludeMethod(type, resource, method, idGenerator));
-        TracingMethodTrigger.addTracingClass(new Class[]{method.getDeclaringClass()});
+        InstResourceFetcher.INSTANCE.transformTracingMethod(new ResourceMethod(type, resource, method, idGenerator));
     }
 
-    private String getMethodDesc(Method method) {
+    private static String getMethodDesc(Method method) {
         String className = method.getDeclaringClass().getName();
         Class<?>[] types = method.getParameterTypes();
         StringBuilder sb = new StringBuilder(className).append(".").append(method.getName()).append("(");
@@ -115,7 +108,7 @@ public class TracingResources {
         return sb.toString();
     }
 
-    private String buildRPCResource(Class type, Method method) {
+    private static String buildRPCResource(Class type, Method method) {
         String[] split = type.getName().split("\\.");
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < split.length; i++) {
@@ -129,7 +122,7 @@ public class TracingResources {
         return sb.toString();
     }
 
-    private Method findMostApplicableMethod(Class type, String method) {
+    private static Method findMostApplicableMethod(Class type, String method) {
         List<Method> namedMethods = new ArrayList<>();
         for (Method declaredMethod : type.getDeclaredMethods()) {
             if (!declaredMethod.getName().equals(method)) {

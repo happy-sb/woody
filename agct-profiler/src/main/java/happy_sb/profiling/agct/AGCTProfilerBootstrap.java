@@ -1,7 +1,7 @@
 package happy_sb.profiling.agct;
 
 import happy_sb.profiler.util.bytecode.InstrumentationUtils;
-import happy_sb.profiling.agct.asm.ResourceFetcherTransformer;
+import happy_sb.profiling.agct.resource.inst.InstResourceFetcher;
 
 import java.lang.instrument.Instrumentation;
 
@@ -13,6 +13,6 @@ import java.lang.instrument.Instrumentation;
 public class AGCTProfilerBootstrap {
     public static void premain(String agentArgs, Instrumentation inst) {
         InstrumentationUtils.setInstrumentation(inst);
-        inst.addTransformer(new ResourceFetcherTransformer());
+        InstResourceFetcher.INSTANCE.bootstrap();
     }
 }

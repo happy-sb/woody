@@ -1,4 +1,4 @@
-package happy_sb.profiling.agct.tool;
+package happy_sb.profiling.agct.constant;
 
 public enum ProfilingEvent {
     CPU("cpu"),

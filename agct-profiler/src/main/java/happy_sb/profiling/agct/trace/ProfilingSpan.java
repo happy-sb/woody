@@ -1,4 +1,4 @@
-package happy_sb.profiling.agct.tracing;
+package happy_sb.profiling.agct.trace;
 
 public class ProfilingSpan {
   private Object traceId;

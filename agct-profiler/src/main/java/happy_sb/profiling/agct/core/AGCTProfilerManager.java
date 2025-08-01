@@ -1,6 +1,6 @@
 package happy_sb.profiling.agct.core;
 
-import happy_sb.profiling.agct.tool.TracingResources;
+import happy_sb.profiling.agct.constant.ProfilingResourceType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,7 +19,15 @@ public class AGCTProfilerManager {
     private static boolean perfEnabled;
     private static boolean allocEnabled;
 
-    private static final TracingResources PROFILING_RESOURCES = new TracingResources();
+    public static ProfilingResourceType[] resourceTypes = new ProfilingResourceType[]
+            {
+                    ProfilingResourceType.HTTP,
+                    ProfilingResourceType.DUBBO,
+                    ProfilingResourceType.GRPC,
+                    ProfilingResourceType.ROCKETMQ,
+                    ProfilingResourceType.KAFKA
+            };
+
     public static Map<Long, Integer> threadIdResourceFrameHitHeight = new HashMap<>(128);
     private Map<Long, Integer> threadTraceNum = Collections.EMPTY_MAP;
 
@@ -35,8 +43,5 @@ public class AGCTProfilerManager {
         return allocEnabled;
     }
 
-    public static TracingResources getProfilingResources() {
-        return PROFILING_RESOURCES;
-    }
 
 }

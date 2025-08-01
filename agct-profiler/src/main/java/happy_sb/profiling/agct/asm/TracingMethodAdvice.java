@@ -2,9 +2,9 @@ package happy_sb.profiling.agct.asm;
 
 import happy_sb.profiler.util.reflection.ReflectionUtils;
 import happy_sb.profiling.agct.core.AGCTTraceManager;
-import happy_sb.profiling.agct.tool.ProfilingIncludeMethods;
-import happy_sb.profiling.agct.tracing.ProfilingSpan;
-import happy_sb.profiling.agct.tracing.ProfilingTrace;
+import happy_sb.profiling.agct.resource.ResourceMethodManager;
+import happy_sb.profiling.agct.trace.ProfilingSpan;
+import happy_sb.profiling.agct.trace.ProfilingTrace;
 
 import java.lang.reflect.Method;
 
@@ -29,11 +29,11 @@ public class TracingMethodAdvice {
     }
 
     public static ProfilingTrace startTrace(String resourceType, String resource, String methodPath, int generatorIndex) {
-        return AGCTTraceManager.startProfilingTrace(Thread.currentThread().getId(), resource, resourceType, methodPath, ProfilingIncludeMethods.ID_GENERATORS[generatorIndex].generateTraceId());
+        return AGCTTraceManager.startProfilingTrace(Thread.currentThread().getId(), resource, resourceType, methodPath, ResourceMethodManager.ID_GENERATORS[generatorIndex].generateTraceId());
     }
 
     public static ProfilingSpan startSpan(String operationName, String methodPath, int generatorIndex) {
-        return AGCTTraceManager.startProfilingSpan(Thread.currentThread().getId(), ProfilingIncludeMethods.ID_GENERATORS[generatorIndex].generateSpanId(), System.nanoTime(), operationName);
+        return AGCTTraceManager.startProfilingSpan(Thread.currentThread().getId(), ResourceMethodManager.ID_GENERATORS[generatorIndex].generateSpanId(), System.nanoTime(), operationName);
     }
 
 

@@ -2,8 +2,8 @@ package happy_sb.profiling.agct.asm;
 
 import happy_sb.profiler.util.MethodUtil;
 import happy_sb.profiling.agct.tool.AGCTPredicate;
-import happy_sb.profiling.agct.tool.ProfilingIncludeMethod;
-import happy_sb.profiling.agct.tool.ProfilingIncludeMethods;
+import happy_sb.profiling.agct.resource.ResourceMethod;
+import happy_sb.profiling.agct.resource.ResourceMethodManager;
 import net.bytebuddy.jar.asm.*;
 
 import java.lang.instrument.ClassFileTransformer;
@@ -38,7 +38,7 @@ public class TracingMethodTransformer implements ClassFileTransformer {
                           @Override
                           public MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
                               MethodVisitor mv = super.visitMethod(access, name, descriptor, signature, exceptions);
-                              ProfilingIncludeMethod includeMethod = ProfilingIncludeMethods.findProfilingIncludeMethod(classBeingRedefined.getName(), name, descriptor);
+                              ResourceMethod includeMethod = ResourceMethodManager.findProfilingIncludeMethod(classBeingRedefined.getName(), name, descriptor);
                               if (includeMethod != null) {
                                   return new TracingMethodVisitor(Opcodes.ASM7, mv, includeMethod);
                               }
@@ -52,7 +52,7 @@ public class TracingMethodTransformer implements ClassFileTransformer {
 
     private class TracingMethodVisitor extends MethodVisitor {
 
-        private ProfilingIncludeMethod includeMethod;
+        private ResourceMethod includeMethod;
 
         private int localVariableIndex;
 
@@ -65,7 +65,7 @@ public class TracingMethodTransformer implements ClassFileTransformer {
 
         private int returnOpcode = -1;
 
-        protected TracingMethodVisitor(int api, MethodVisitor methodVisitor, ProfilingIncludeMethod includeMethod) {
+        protected TracingMethodVisitor(int api, MethodVisitor methodVisitor, ResourceMethod includeMethod) {
             super(api, methodVisitor);
             this.includeMethod = includeMethod;
             Method method = includeMethod.getMethod();

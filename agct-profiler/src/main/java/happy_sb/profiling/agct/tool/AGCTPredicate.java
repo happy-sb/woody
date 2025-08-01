@@ -3,9 +3,10 @@ package happy_sb.profiling.agct.tool;
 import happy_sb.profiler.util.ignore.IgnoredTypesBuilder;
 import happy_sb.profiler.util.ignore.IgnoredTypesBuilderImpl;
 import happy_sb.profiler.util.ignore.IgnoredTypesPredicate;
+import happy_sb.profiling.agct.constant.ProfilingResourceType;
+import happy_sb.profiling.agct.core.AGCTProfilerManager;
 
-import static happy_sb.profiling.agct.asm.ResourceMethodFetcherAdvice.*;
-import static happy_sb.profiling.agct.tool.ProfilingIncludeMethods.TRACING_METHODS;
+import static happy_sb.profiling.agct.resource.ResourceMethodManager.TRACING_METHODS;
 
 /**
  * @author jiangjibo
@@ -18,12 +19,11 @@ public class AGCTPredicate {
 
     static {
         IgnoredTypesBuilder builder = new IgnoredTypesBuilderImpl();
-        builder.allowClass(SPRING_WEB_INSTRUMENTATION_CLASS);
-        builder.allowClass(DUBBO_INSTRUMENTATION_CLASS);
-        builder.allowClass(GRPC_INSTRUMENTATION_CLASS);
-        builder.allowClass(ROCKETMQ_INSTRUMENTATION_CLASS_1);
-        builder.allowClass(ROCKETMQ_INSTRUMENTATION_CLASS_2);
-        builder.allowClass(KAFKA_INSTRUMENTATION_CLASS);
+        for (ProfilingResourceType resourceType : AGCTProfilerManager.resourceTypes) {
+            for (String clazz : resourceType.resourceClasses()) {
+                builder.allowClass(clazz);
+            }
+        }
         TYPES_PREDICATE = builder.buildTransformIgnoredPredicate();
     }
 

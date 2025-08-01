@@ -1,4 +1,4 @@
-package happy_sb.profiling.agct.tool;
+package happy_sb.profiling.agct.resource;
 
 
 import happy_sb.profiler.util.MethodUtil;
@@ -6,7 +6,7 @@ import happy_sb.profiling.api.id.IdGenerator;
 
 import java.lang.reflect.Method;
 
-public class ProfilingIncludeMethod {
+public class ResourceMethod {
     private Class clazz;
     private String methodName;
     private String descriptor;
@@ -22,11 +22,11 @@ public class ProfilingIncludeMethod {
 
     private IdGenerator idGenerator;
 
-    public ProfilingIncludeMethod(String resourceType, String resource, Method method) {
+    public ResourceMethod(String resourceType, String resource, Method method) {
         this(resourceType, resource, method, IdGenerator.INSTANCE);
     }
 
-    public ProfilingIncludeMethod(String resourceType, String resource, Method method, IdGenerator idGenerator) {
+    public ResourceMethod(String resourceType, String resource, Method method, IdGenerator idGenerator) {
         this.resourceType = resourceType;
         this.resource = resource;
         this.methodName = method.getName();

@@ -1,4 +1,4 @@
-package happy_sb.profiling.agct.tool;
+package happy_sb.profiling.agct.resource;
 
 import happy_sb.profiling.api.id.IdGenerator;
 
@@ -12,15 +12,15 @@ import java.util.concurrent.ConcurrentHashMap;
  * @version 1.0
  * @since 2025/7/30
  */
-public class ProfilingIncludeMethods {
+public class ResourceMethodManager {
 
-    private static final List<ProfilingIncludeMethod> PROFILING_INCLUDE_METHODS = new ArrayList<>();
+    private static final List<ResourceMethod> PROFILING_INCLUDE_METHODS = new ArrayList<>();
     private static final Set<Integer> GENERATOR_INDEXES = ConcurrentHashMap.newKeySet();
 
     public static IdGenerator[] ID_GENERATORS = new IdGenerator[10];
     public static final Set<String> TRACING_METHODS = ConcurrentHashMap.newKeySet();
 
-    public static void addProfilingIncludeMethod(ProfilingIncludeMethod method) {
+    public static void addProfilingIncludeMethod(ResourceMethod method) {
         PROFILING_INCLUDE_METHODS.add(method);
         TRACING_METHODS.add(method.getClazz().getName().replace(".", "/"));
 
@@ -34,8 +34,8 @@ public class ProfilingIncludeMethods {
         addIdGenerator(method.getIdGenerator());
     }
 
-    public static ProfilingIncludeMethod findProfilingIncludeMethod(String className, String methodName, String descriptor) {
-        for (ProfilingIncludeMethod method : PROFILING_INCLUDE_METHODS) {
+    public static ResourceMethod findProfilingIncludeMethod(String className, String methodName, String descriptor) {
+        for (ResourceMethod method : PROFILING_INCLUDE_METHODS) {
             if (method.getClazz().getName().equals(className) && method.getMethodName().equals(methodName) && method.getSignature().equals(descriptor)) {
                 return method;
             }
