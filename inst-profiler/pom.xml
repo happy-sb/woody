@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>happy_sb</groupId>
+        <groupId>happy2b</groupId>
         <artifactId>one-profiler</artifactId>
         <version>1.0</version>
     </parent>
@@ -19,12 +19,12 @@
 
     <dependencies>
         <dependency>
-            <groupId>happy_sb</groupId>
+            <groupId>happy2b</groupId>
             <artifactId>profiler-utils</artifactId>
             <version>1.0</version>
         </dependency>
         <dependency>
-            <groupId>happy_sb</groupId>
+            <groupId>happy2b</groupId>
             <artifactId>profiler-api</artifactId>
             <version>1.0</version>
         </dependency>
@@ -58,7 +58,7 @@
                     </descriptorRefs>
                     <archive>
                         <manifestEntries>
-                            <Premain-Class>happy_sb.profiling.inst.InstrumentationProfilerBootstrap</Premain-Class>
+                            <Premain-Class>happy2b.profiling.inst.InstrumentationProfilerBootstrap</Premain-Class>
                             <Can-Redefine-Classes>true</Can-Redefine-Classes>
                             <Can-Retransform-Classes>true</Can-Retransform-Classes>
                         </manifestEntries>
