@@ -3,9 +3,11 @@ package happy_sb.profiling.agct.resource.inst;
 import happy_sb.profiler.util.AgentThreadFactory;
 import happy_sb.profiler.util.bytecode.InstrumentationUtils;
 import happy_sb.profiling.agct.asm.TracingMethodTransformer;
+import happy_sb.profiling.agct.core.AGCTProfiler;
 import happy_sb.profiling.agct.resource.IResourceFetcher;
 import happy_sb.profiling.agct.resource.ResourceMethod;
 import happy_sb.profiling.agct.resource.ResourceMethodManager;
+import one.profiler.AsyncProfiler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -73,6 +75,8 @@ public class InstResourceFetcher implements IResourceFetcher {
                     } catch (Exception e) {
                         log.error("One-Profiler: Retransform class '{}' occur exception!", clazz.getName(), e);
                     }
+
+                    AGCTProfiler.startProfiling(null, null);
                 }
             }
         });

@@ -4,11 +4,13 @@ import happy_sb.profiling.agct.constant.ProfilingEvent;
 import happy_sb.profiling.agct.constant.ProfilingResourceType;
 import happy_sb.profiling.agct.resource.ResourcesExtractor;
 import happy_sb.profiling.api.id.IdGenerator;
+import one.profiler.AsyncProfiler;
 
 import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author jiangjibo
@@ -31,6 +33,19 @@ public class AGCTProfiler {
 
     public static void startProfiling(Map<ProfilingEvent, String> events, ProfilingResourceType... types) {
         AGCTProfilerManager.resourceTypes = types;
+        AsyncProfiler asyncProfiler = AsyncProfiler.getInstance();
+
+        Set<String> supportEvents = asyncProfiler.getSupportEvents();
+
+        asyncProfiler.start("alloc", 100);
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        asyncProfiler.stop();
+        String traces = asyncProfiler.dumpTraces(10000);
+        System.out.println(traces);
     }
 
     public static List finishProfiling() {
