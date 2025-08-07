@@ -7,7 +7,10 @@ import org.slf4j.LoggerFactory;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.Instrumentation;
 import java.lang.instrument.UnmodifiableClassException;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class InstrumentationUtils {
@@ -30,11 +33,11 @@ public class InstrumentationUtils {
     public static boolean retransformClasses(ClassFileTransformer transformer, Class... classes) {
         Instrumentation inst = instrumentationRef.get();
         try {
-            inst.addTransformer(transformer,true);
+            inst.addTransformer(transformer, true);
             inst.retransformClasses(classes);
             return true;
         } catch (UnmodifiableClassException e) {
-            logger.error("[databuff-profiling-span]: RetransformClasses class error, classes:{}", classes, e);
+            logger.error("[One-Profiler]: RetransformClasses class error, classes:{}", classes, e);
             inst.removeTransformer(transformer);
             return false;
         }
@@ -51,7 +54,7 @@ public class InstrumentationUtils {
                 try {
                     inst.retransformClasses(clazz);
                 } catch (Throwable e) {
-                    logger.error("[databuff-profiling-span]: RetransformClasses class error, class:{}", clazz.getName(), e);
+                    logger.error("[One-Profiler]: RetransformClasses class error, class:{}", clazz.getName(), e);
                 }
             }
         } finally {
@@ -61,5 +64,25 @@ public class InstrumentationUtils {
 
     public static boolean isLambdaClass(Class<?> clazz) {
         return clazz.getName().contains("$$Lambda$");
+    }
+
+    public static List<Class> findClass(String ... classNames) {
+        Instrumentation instrumentation = instrumentationRef.get();
+        if (instrumentation == null) {
+            logger.error("[One-Profiler]: InstrumentationUtils: instrumentation is null");
+            return null;
+        }
+        Set<String> nameSet = new HashSet<>(classNames.length);
+        for (String className : classNames) {
+            nameSet.add(className);
+        }
+
+        List<Class> classes = new ArrayList<>();
+        for (Class clazz : instrumentation.getAllLoadedClasses()) {
+            if (nameSet.contains(clazz.getName())) {
+                classes.add(clazz);
+            }
+        }
+        return classes;
     }
 }

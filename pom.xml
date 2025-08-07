@@ -9,8 +9,8 @@
     <version>1.0</version>
     <packaging>pom</packaging>
     <modules>
-        <module>agct-profiler</module>
-        <module>inst-profiler</module>
+        <module>flame-graph</module>
+        <module>code-analyzing</module>
         <module>profiler-utils</module>
         <module>profiler-api</module>
     </modules>
