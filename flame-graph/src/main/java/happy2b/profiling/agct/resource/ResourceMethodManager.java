@@ -14,7 +14,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class ResourceMethodManager {
 
-    private static final List<ResourceMethod> PROFILING_INCLUDE_METHODS = new ArrayList<>();
+    public static final List<ResourceMethod> PROFILING_INCLUDE_METHODS = new ArrayList<>();
     private static final Set<Integer> GENERATOR_INDEXES = ConcurrentHashMap.newKeySet();
 
     public static IdGenerator[] ID_GENERATORS = new IdGenerator[10];

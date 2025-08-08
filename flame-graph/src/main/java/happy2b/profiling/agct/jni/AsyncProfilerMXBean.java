@@ -5,6 +5,9 @@
 
 package happy2b.profiling.agct.jni;
 
+import happy2b.profiling.agct.resource.ResourceMethod;
+
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -33,6 +36,8 @@ public interface AsyncProfilerMXBean {
     String dumpFlat(int maxMethods);
 
     Set<String> getSupportEvents();
+
+    void setResourceMethods(List<ResourceMethod> methods) throws IllegalStateException;
 
     <T> T[] getInstances(Class<T> clazz, int limit) throws IllegalStateException;
 }

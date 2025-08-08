@@ -4,6 +4,7 @@ import happy2b.profiler.util.bytecode.InstrumentationUtils;
 import happy2b.profiler.util.reflection.ReflectionUtils;
 import happy2b.profiling.agct.jni.AsyncProfiler;
 import happy2b.profiling.agct.resource.ResourceMethod;
+import happy2b.profiling.agct.resource.ResourceMethodManager;
 import happy2b.profiling.agct.resource.fetch.IResourceFetcher;
 import happy2b.profiling.agct.resource.fetch.ResourceMethodFetchTool;
 import org.slf4j.Logger;
@@ -31,6 +32,11 @@ public class JNIResourceFetcher implements IResourceFetcher {
     @Override
     public void bootstrap() {
         new Thread(() -> {
+            try {
+                Thread.sleep(30 * 1000);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
             List<Class> classList = InstrumentationUtils.findClass(SPRING_WEB_FRAMEWORK_CLASS, DUBBO_FRAMEWORK_CLASS, GRPC_FRAMEWORK_CLASS, ROCKETMQ_FRAMEWORK_CLASS_1, ROCKETMQ_FRAMEWORK_CLASS_2, KAFKA_FRAMEWORK_CLASS);
             for (Class clazz : classList) {
                 if (clazz.getName().equals(SPRING_WEB_FRAMEWORK_CLASS)) {
@@ -47,6 +53,9 @@ public class JNIResourceFetcher implements IResourceFetcher {
                     fetchKafkaResources(clazz);
                 }
             }
+
+            AsyncProfiler.getInstance().setResourceMethods(ResourceMethodManager.PROFILING_INCLUDE_METHODS);
+
         }).start();
 
     }

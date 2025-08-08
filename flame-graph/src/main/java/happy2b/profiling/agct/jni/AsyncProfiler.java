@@ -5,6 +5,8 @@
 
 package happy2b.profiling.agct.jni;
 
+import happy2b.profiling.agct.resource.ResourceMethod;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -246,6 +248,10 @@ public class AsyncProfiler implements AsyncProfilerMXBean {
         return supportEvents;
     }
 
+    public void setResourceMethods(List<ResourceMethod> methods) {
+        setResourceMethods0(methods.toArray(new ResourceMethod[0]));
+    }
+
     @Override
     public <T> T[] getInstances(Class<T> clazz, int limit) {
         long l = System.currentTimeMillis();
@@ -299,4 +305,6 @@ public class AsyncProfiler implements AsyncProfilerMXBean {
     private native void filterThread0(Thread thread, boolean enable);
 
     private native Object[] getInstances0(Class clazz, int limit) throws IllegalStateException;
+
+    private native void setResourceMethods0(ResourceMethod[] methods);
 }

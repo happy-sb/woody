@@ -2,6 +2,9 @@ package happy2b.profiling.agct.core;
 
 import happy2b.profiling.agct.constant.ProfilingEvent;
 import happy2b.profiling.agct.constant.ProfilingResourceType;
+import happy2b.profiling.agct.jni.AsyncProfiler;
+import happy2b.profiling.agct.resource.ResourceMethod;
+import happy2b.profiling.agct.resource.ResourceMethodManager;
 import happy2b.profiling.agct.resource.fetch.inst.ResourcesExtractor;
 import happy2b.profiling.api.id.IdGenerator;
 
@@ -31,6 +34,11 @@ public class AGCTProfiler {
 
     public static void startProfiling(Map<ProfilingEvent, String> events, ProfilingResourceType... types) throws Exception {
         AGCTProfilerManager.resourceTypes = types;
+        if (ResourceMethodManager.PROFILING_INCLUDE_METHODS.isEmpty()) {
+            System.out.println("No profiling include methods");
+            return;
+        }
+        AsyncProfiler.getInstance().setResourceMethods(ResourceMethodManager.PROFILING_INCLUDE_METHODS);
     }
 
     public static List finishProfiling() {
