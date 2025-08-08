@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -30,26 +31,21 @@ public class JNIResourceFetcher implements IResourceFetcher {
     @Override
     public void bootstrap() {
         new Thread(() -> {
-            try {
-                Thread.sleep(30 * 1000);
-
-//                List<Class> classList = InstrumentationUtils.findClass(SPRING_WEB_FRAMEWORK_CLASS, DUBBO_FRAMEWORK_CLASS, GRPC_FRAMEWORK_CLASS, ROCKETMQ_FRAMEWORK_CLASS_1, ROCKETMQ_FRAMEWORK_CLASS_2);
-                List<Class> classList = InstrumentationUtils.findClass(DUBBO_FRAMEWORK_CLASS, ROCKETMQ_FRAMEWORK_CLASS_1);
-                for (Class clazz : classList) {
-                    if (clazz.getName().equals(SPRING_WEB_FRAMEWORK_CLASS)) {
-                        fetchSpringWebResources(clazz);
-                    } else if (clazz.getName().equals(DUBBO_FRAMEWORK_CLASS)) {
-                        fetchDubboResources(clazz);
-                    } else if (clazz.getName().equals(GRPC_FRAMEWORK_CLASS)) {
-                        fetchGrpcResources(clazz);
-                    } else if (clazz.getName().equals(ROCKETMQ_FRAMEWORK_CLASS_1)) {
-                        fetchRocketMQResources_1(clazz);
-                    } else if (clazz.getName().equals(ROCKETMQ_FRAMEWORK_CLASS_2)) {
-                        fetchRocketMQResources_2(clazz);
-                    }
+            List<Class> classList = InstrumentationUtils.findClass(SPRING_WEB_FRAMEWORK_CLASS, DUBBO_FRAMEWORK_CLASS, GRPC_FRAMEWORK_CLASS, ROCKETMQ_FRAMEWORK_CLASS_1, ROCKETMQ_FRAMEWORK_CLASS_2, KAFKA_FRAMEWORK_CLASS);
+            for (Class clazz : classList) {
+                if (clazz.getName().equals(SPRING_WEB_FRAMEWORK_CLASS)) {
+                    fetchSpringWebResources(clazz);
+                } else if (clazz.getName().equals(DUBBO_FRAMEWORK_CLASS)) {
+                    fetchDubboResources(clazz);
+                } else if (clazz.getName().equals(GRPC_FRAMEWORK_CLASS)) {
+                    fetchGrpcResources(clazz);
+                } else if (clazz.getName().equals(ROCKETMQ_FRAMEWORK_CLASS_1)) {
+                    fetchRocketMQResources_1(clazz);
+                } else if (clazz.getName().equals(ROCKETMQ_FRAMEWORK_CLASS_2)) {
+                    fetchRocketMQResources_2(clazz);
+                } else if (clazz.getName().equals(KAFKA_FRAMEWORK_CLASS)) {
+                    fetchKafkaResources(clazz);
                 }
-            } catch (Exception e) {
-
             }
         }).start();
 
@@ -71,7 +67,7 @@ public class JNIResourceFetcher implements IResourceFetcher {
 
     private void fetchDubboResources(Class clazz) {
         try {
-            Object[] instances = AsyncProfiler.getInstance().getInstances(clazz, 20);
+            Object[] instances = AsyncProfiler.getInstance().getInstances(clazz, 100);
             if (instances == null || instances.length == 0) {
                 log.error("One-Profiler: Failed to fetch dubbo '{}' instance!", clazz.getName());
                 return;
@@ -132,7 +128,7 @@ public class JNIResourceFetcher implements IResourceFetcher {
 
     private void fetchRocketMQResources_1(Class clazz) {
         try {
-            Object[] instances = AsyncProfiler.getInstance().getInstances(clazz, 10);
+            Object[] instances = AsyncProfiler.getInstance().getInstances(clazz, 100);
             if (instances == null || instances.length == 0) {
                 log.error("One-Profiler: Failed to fetch rocketmq '{}' instance!", clazz.getName());
                 return;
@@ -148,7 +144,7 @@ public class JNIResourceFetcher implements IResourceFetcher {
 
     private void fetchRocketMQResources_2(Class clazz) {
         try {
-            Object[] instances = AsyncProfiler.getInstance().getInstances(clazz, 10);
+            Object[] instances = AsyncProfiler.getInstance().getInstances(clazz, 100);
             if (instances == null || instances.length == 0) {
                 log.error("One-Profiler: Failed to fetch rocketmq '{}' instance!", clazz.getName());
                 return;
@@ -163,6 +159,28 @@ public class JNIResourceFetcher implements IResourceFetcher {
             }
         } catch (Exception e) {
             log.error("One-Profiler: Fetch rocketmq resource occur exception!", e);
+        }
+    }
+
+    private void fetchKafkaResources(Class clazz) {
+        try {
+            Object[] instances = AsyncProfiler.getInstance().getInstances(clazz, 100);
+            if (instances == null || instances.length == 0) {
+                log.error("One-Profiler: Failed to fetch kafka '{}' instance!", clazz.getName());
+                return;
+            }
+            for (Object instance : instances) {
+                Method method = ReflectionUtils.invoke(instance, "getMethod");
+                if (method == null) {
+                    log.error("One-Profiler: Failed to fetch kafka '{}' method!", instance.getClass().getName());
+                    return;
+                }
+                Collection<String> topics = ReflectionUtils.invoke(instance, "getTopics");
+                ResourceMethod resourceMethod = new ResourceMethod("kafka", "Consume Topic " + String.join(",", topics), method);
+                IResourceFetcher.addResourceMethod(resourceMethod);
+            }
+        } catch (Exception e) {
+            log.error("One-Profiler: Fetch kafka resource occur exception!", e);
         }
     }
 }

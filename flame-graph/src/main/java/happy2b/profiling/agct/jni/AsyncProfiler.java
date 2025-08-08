@@ -248,7 +248,10 @@ public class AsyncProfiler implements AsyncProfilerMXBean {
 
     @Override
     public <T> T[] getInstances(Class<T> clazz, int limit) {
-        return (T[]) getInstances0(clazz, limit);
+        long l = System.currentTimeMillis();
+        T[] ret = (T[]) getInstances0(clazz, limit);
+        System.err.println("class: '" + clazz.getName() + "', limit:" + limit + ", dumpFlat cost:" + (System.currentTimeMillis() - l) + "ms, instance num:" + ret.length);
+        return ret;
     }
 
     /**

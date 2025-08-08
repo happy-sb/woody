@@ -1,13 +1,12 @@
 package happy2b.profiling.agct.resource.transform;
 
 import happy2b.profiler.util.MethodUtil;
-import happy2b.profiling.agct.tool.AGCTPredicate;
 import happy2b.profiling.agct.resource.ResourceMethod;
 import happy2b.profiling.agct.resource.ResourceMethodManager;
+import happy2b.profiling.agct.tool.AGCTPredicate;
 import net.bytebuddy.jar.asm.*;
 
 import java.lang.instrument.ClassFileTransformer;
-import java.lang.instrument.IllegalClassFormatException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.security.ProtectionDomain;
@@ -23,7 +22,7 @@ import static net.bytebuddy.jar.asm.Opcodes.*;
 public class ResourceMethodTransformer implements ClassFileTransformer {
 
     @Override
-    public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classfileBuffer) throws IllegalClassFormatException {
+    public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classfileBuffer) {
         if (classBeingRedefined == null) {
             return null;
         }
@@ -39,56 +38,64 @@ public class ResourceMethodTransformer implements ClassFileTransformer {
             public MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
                 MethodVisitor mv = super.visitMethod(access, name, descriptor, signature, exceptions);
                 ResourceMethod includeMethod = ResourceMethodManager.findProfilingIncludeMethod(classBeingRedefined.getName(), name, descriptor);
-                if (includeMethod != null) {
-                    return new TracingMethodVisitor(Opcodes.ASM7, mv, includeMethod);
-                }
-                return mv;
+                return includeMethod == null ? mv : new TracingMethodVisitor(Opcodes.ASM7, mv, includeMethod);
             }
-        }, 0);
+        }, ClassReader.EXPAND_FRAMES);
         return writer.toByteArray();
 
     }
 
-    private class TracingMethodVisitor extends MethodVisitor {
+    public static class TracingMethodVisitor extends MethodVisitor {
 
         private ResourceMethod includeMethod;
 
-        private int localVariableIndex;
+        private Label startLabel, endLabel;
+        private Label tryStartLabel, tryEndLabel, catchLabel;
 
-        private Label startTraceLabel = new Label();
-        private Label methodEnd = new Label();
+        private int localVarIndex;
 
-        private Label tryStartLabel = new Label();
-        private Label tryEndLabel = new Label();
-        private Label catchLabel = new Label();
-
-        private int returnOpcode = -1;
-
-        protected TracingMethodVisitor(int api, MethodVisitor methodVisitor, ResourceMethod includeMethod) {
+        public TracingMethodVisitor(int api, MethodVisitor methodVisitor, ResourceMethod includeMethod) {
             super(api, methodVisitor);
             this.includeMethod = includeMethod;
             Method method = includeMethod.getMethod();
-            this.localVariableIndex = method.getParameterTypes().length + (Modifier.isStatic(method.getModifiers()) ? 0 : 1);
+            this.localVarIndex = method.getParameterTypes().length + (Modifier.isStatic(method.getModifiers()) ? 0 : 1);
         }
 
         @Override
         public void visitCode() {
-            super.visitCode();
+            startLabel = new Label();
+            endLabel = new Label();
+            tryStartLabel = new Label();
+            tryEndLabel = new Label();
+            catchLabel = new Label();
 
-            mv.visitLabel(startTraceLabel);
+            mv.visitLabel(startLabel);
+
             mv.visitLdcInsn(includeMethod.getResourceType());
             mv.visitLdcInsn(includeMethod.getResource());
             mv.visitLdcInsn(includeMethod.getMethodPath());
             mv.visitLdcInsn(includeMethod.getIdGenerator().getOrder());
             mv.visitMethodInsn(INVOKESTATIC, ADVICE_CLASS, START_TRACE_METHOD.getName(), MethodUtil.getMethodDescriptor(START_TRACE_METHOD), false);
-            mv.visitVarInsn(ASTORE, localVariableIndex);
+            mv.visitVarInsn(ASTORE, localVarIndex);
 
             mv.visitLabel(tryStartLabel);
+
+            super.visitCode();
         }
 
         @Override
+        public void visitInsn(int opcode) {
+            if ((opcode >= IRETURN && opcode <= RETURN) || opcode == ATHROW) {
+                mv.visitVarInsn(ALOAD, localVarIndex);
+                mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, PROFILING_TRACE_CLASS, FINISH_TRACE_METHOD.getName(), MethodUtil.getMethodDescriptor(FINISH_TRACE_METHOD), false);
+            }
+            super.visitInsn(opcode);
+        }
+
+
+        @Override
         public void visitLocalVariable(String name, String descriptor, String signature, Label start, Label end, int index) {
-            if (index >= localVariableIndex) {
+            if (index >= localVarIndex) {
                 index += 1;
             }
             super.visitLocalVariable(name, descriptor, signature, start, end, index);
@@ -96,26 +103,15 @@ public class ResourceMethodTransformer implements ClassFileTransformer {
 
         @Override
         public void visitIincInsn(int varIndex, int increment) {
-            if (varIndex >= localVariableIndex) {
+            if (varIndex >= localVarIndex) {
                 varIndex += 1;
             }
             super.visitIincInsn(varIndex, increment);
         }
 
         @Override
-        public void visitInsn(int opcode) {
-            if ((opcode >= Opcodes.IRETURN && opcode <= Opcodes.RETURN) || opcode == Opcodes.ATHROW) {
-                returnOpcode = opcode;
-                mv.visitLabel(tryEndLabel);
-                mv.visitJumpInsn(Opcodes.GOTO, catchLabel);
-            }
-            super.visitInsn(opcode);
-
-        }
-
-        @Override
         public void visitVarInsn(int opcode, int varIndex) {
-            if (varIndex >= localVariableIndex) {
+            if (varIndex >= localVarIndex) {
                 varIndex += 1;
             }
             super.visitVarInsn(opcode, varIndex);
@@ -123,22 +119,21 @@ public class ResourceMethodTransformer implements ClassFileTransformer {
 
         @Override
         public void visitMaxs(int maxStack, int maxLocals) {
+            mv.visitLabel(tryEndLabel);
+            mv.visitTryCatchBlock(tryStartLabel, tryEndLabel, catchLabel, "java/lang/Throwable");
 
             mv.visitLabel(catchLabel);
+            int exceptionIndex = localVarIndex + 1;
+            mv.visitVarInsn(ASTORE, exceptionIndex);
 
-            mv.visitVarInsn(Opcodes.ALOAD, localVariableIndex);
+            mv.visitVarInsn(ALOAD, localVarIndex);
             mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, PROFILING_TRACE_CLASS, FINISH_TRACE_METHOD.getName(), MethodUtil.getMethodDescriptor(FINISH_TRACE_METHOD), false);
 
-            mv.visitTryCatchBlock(tryStartLabel, tryEndLabel, catchLabel, null);
+            mv.visitVarInsn(ALOAD, exceptionIndex);
+            mv.visitInsn(ATHROW);
 
-            if (returnOpcode == Opcodes.ATHROW) {
-                mv.visitInsn(Opcodes.ATHROW);
-            } else if (returnOpcode != -1) {
-                mv.visitInsn(returnOpcode);
-            }
-            mv.visitLabel(methodEnd);
-
-            mv.visitLocalVariable("oneTrace", PROFILING_TRACE_CLASS, null, startTraceLabel, methodEnd, localVariableIndex);
+            mv.visitLabel(endLabel);
+            mv.visitLocalVariable("oneTrace", PROFILING_TRACE_CLASS, null, startLabel, endLabel, localVarIndex);
 
             super.visitMaxs(maxStack, maxLocals);
         }

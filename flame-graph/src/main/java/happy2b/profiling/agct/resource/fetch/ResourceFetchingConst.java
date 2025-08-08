@@ -46,5 +46,6 @@ public interface ResourceFetchingConst {
     String GRPC_FRAMEWORK_CLASS = "io.grpc.internal.ServerImpl";
     String ROCKETMQ_FRAMEWORK_CLASS_1 = "org.apache.rocketmq.spring.support.DefaultRocketMQListenerContainer";
     String ROCKETMQ_FRAMEWORK_CLASS_2 = "org.apache.rocketmq.client.consumer.DefaultMQPushConsumer";
+    String KAFKA_FRAMEWORK_CLASS = "org.springframework.kafka.config.MethodKafkaListenerEndpoint";
     // ---------------------------------------------------------- JNI ---------------------------------------------------------
 }
