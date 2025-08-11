@@ -4,7 +4,11 @@ import happy2b.profiler.util.MethodUtil;
 import happy2b.profiling.agct.resource.ResourceMethod;
 import happy2b.profiling.agct.resource.ResourceMethodManager;
 import happy2b.profiling.agct.tool.AGCTPredicate;
+import happy2b.profiling.api.id.IdGenerator;
+import happy2b.profiling.api.id.ParameterIdGenerator;
 import net.bytebuddy.jar.asm.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.reflect.Method;
@@ -20,6 +24,8 @@ import static net.bytebuddy.jar.asm.Opcodes.*;
  * @since 2025/7/23
  */
 public class ResourceMethodTransformer implements ClassFileTransformer {
+
+    private static final Logger log = LoggerFactory.getLogger(ResourceMethodTransformer.class);
 
     @Override
     public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classfileBuffer) {
@@ -52,13 +58,15 @@ public class ResourceMethodTransformer implements ClassFileTransformer {
         private Label startLabel, endLabel;
         private Label tryStartLabel, tryEndLabel, catchLabel;
 
+        private boolean isStatic;
         private int localVarIndex;
 
         public TracingMethodVisitor(int api, MethodVisitor methodVisitor, ResourceMethod includeMethod) {
             super(api, methodVisitor);
             this.includeMethod = includeMethod;
             Method method = includeMethod.getMethod();
-            this.localVarIndex = method.getParameterTypes().length + (Modifier.isStatic(method.getModifiers()) ? 0 : 1);
+            this.isStatic = Modifier.isStatic(method.getModifiers());
+            this.localVarIndex = method.getParameterTypes().length + (isStatic ? 0 : 1);
         }
 
         @Override
@@ -74,8 +82,21 @@ public class ResourceMethodTransformer implements ClassFileTransformer {
             mv.visitLdcInsn(includeMethod.getResourceType());
             mv.visitLdcInsn(includeMethod.getResource());
             mv.visitLdcInsn(includeMethod.getMethodPath());
-            mv.visitLdcInsn(includeMethod.getIdGenerator().getOrder());
-            mv.visitMethodInsn(INVOKESTATIC, ADVICE_CLASS, START_TRACE_METHOD.getName(), MethodUtil.getMethodDescriptor(START_TRACE_METHOD), false);
+
+            int order = includeMethod.getIdGenerator().getOrder();
+            mv.visitLdcInsn(order);
+            IdGenerator idGenerator = ResourceMethodManager.ID_GENERATORS[order];
+            if (idGenerator instanceof ParameterIdGenerator) {
+                if (includeMethod.getMethod().getParameterTypes().length == 0) {
+                    throw new IllegalStateException("method " + includeMethod.getMethodName() + " has no parameter");
+                }
+                int paramIndex = ((ParameterIdGenerator<?>) idGenerator).paramIndex();
+                mv.visitVarInsn(ALOAD, isStatic ? paramIndex : paramIndex + 1);
+                mv.visitMethodInsn(INVOKESTATIC, ADVICE_CLASS, START_TRACE_WITH_PARAM_METHOD.getName(), MethodUtil.getMethodDescriptor(START_TRACE_WITH_PARAM_METHOD), false);
+            } else {
+                mv.visitMethodInsn(INVOKESTATIC, ADVICE_CLASS, START_TRACE_METHOD.getName(), MethodUtil.getMethodDescriptor(START_TRACE_METHOD), false);
+            }
+
             mv.visitVarInsn(ASTORE, localVarIndex);
 
             mv.visitLabel(tryStartLabel);
