@@ -5,7 +5,7 @@ import happy2b.profiling.agct.core.AGCTTraceManager;
 import happy2b.profiling.agct.resource.ResourceMethodManager;
 import happy2b.profiling.agct.trace.ProfilingSpan;
 import happy2b.profiling.agct.trace.ProfilingTrace;
-import happy2b.profiling.api.id.ParameterIdGenerator;
+import happy2b.profiling.api.id.ParametricIdGenerator;
 
 import java.lang.reflect.Method;
 
@@ -38,7 +38,7 @@ public class ResourceMethodAdvice {
     }
 
     public static ProfilingTrace startTrace(String resourceType, String resource, String methodPath, int generatorIndex, Object param) {
-        ParameterIdGenerator idGenerator = (ParameterIdGenerator) ResourceMethodManager.ID_GENERATORS[generatorIndex];
+        ParametricIdGenerator idGenerator = (ParametricIdGenerator) ResourceMethodManager.ID_GENERATORS[generatorIndex];
         return AGCTTraceManager.startProfilingTrace(Thread.currentThread().getId(), resource, resourceType, methodPath, idGenerator.generateTraceId(param));
     }
 
@@ -47,7 +47,7 @@ public class ResourceMethodAdvice {
     }
 
     public static ProfilingSpan startSpan(String operationName, String methodPath, int generatorIndex, Object param) {
-        ParameterIdGenerator idGenerator = (ParameterIdGenerator) ResourceMethodManager.ID_GENERATORS[generatorIndex];
+        ParametricIdGenerator idGenerator = (ParametricIdGenerator) ResourceMethodManager.ID_GENERATORS[generatorIndex];
         return AGCTTraceManager.startProfilingSpan(Thread.currentThread().getId(), idGenerator.generateSpanId(param), System.nanoTime(), operationName);
     }
 

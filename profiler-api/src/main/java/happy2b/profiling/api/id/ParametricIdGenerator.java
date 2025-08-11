@@ -1,6 +1,6 @@
 package happy2b.profiling.api.id;
 
-public interface ParameterIdGenerator<T> extends IdGenerator {
+public interface ParametricIdGenerator<T> extends IdGenerator {
 
     T generateTraceId(Object param);
 

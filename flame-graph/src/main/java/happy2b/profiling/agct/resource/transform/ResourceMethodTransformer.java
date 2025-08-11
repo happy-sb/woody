@@ -5,7 +5,7 @@ import happy2b.profiling.agct.resource.ResourceMethod;
 import happy2b.profiling.agct.resource.ResourceMethodManager;
 import happy2b.profiling.agct.tool.AGCTPredicate;
 import happy2b.profiling.api.id.IdGenerator;
-import happy2b.profiling.api.id.ParameterIdGenerator;
+import happy2b.profiling.api.id.ParametricIdGenerator;
 import net.bytebuddy.jar.asm.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -86,11 +86,11 @@ public class ResourceMethodTransformer implements ClassFileTransformer {
             int order = includeMethod.getIdGenerator().getOrder();
             mv.visitLdcInsn(order);
             IdGenerator idGenerator = ResourceMethodManager.ID_GENERATORS[order];
-            if (idGenerator instanceof ParameterIdGenerator) {
+            if (idGenerator instanceof ParametricIdGenerator) {
                 if (includeMethod.getMethod().getParameterTypes().length == 0) {
                     throw new IllegalStateException("method " + includeMethod.getMethodName() + " has no parameter");
                 }
-                int paramIndex = ((ParameterIdGenerator<?>) idGenerator).paramIndex();
+                int paramIndex = ((ParametricIdGenerator<?>) idGenerator).paramIndex();
                 mv.visitVarInsn(ALOAD, isStatic ? paramIndex : paramIndex + 1);
                 mv.visitMethodInsn(INVOKESTATIC, ADVICE_CLASS, START_TRACE_WITH_PARAM_METHOD.getName(), MethodUtil.getMethodDescriptor(START_TRACE_WITH_PARAM_METHOD), false);
             } else {
