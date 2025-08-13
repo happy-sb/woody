@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>happy2b</groupId>
-        <artifactId>one-profiler</artifactId>
+        <artifactId>woody</artifactId>
         <version>1.0</version>
     </parent>
 
@@ -58,7 +58,7 @@
                     </descriptorRefs>
                     <archive>
                         <manifestEntries>
-                            <Premain-Class>happy2b.profiling.inst.InstrumentationProfilerBootstrap</Premain-Class>
+                            <Premain-Class>happy2b.woody.inst.InstrumentationProfilerBootstrap</Premain-Class>
                             <Can-Redefine-Classes>true</Can-Redefine-Classes>
                             <Can-Retransform-Classes>true</Can-Retransform-Classes>
                         </manifestEntries>
