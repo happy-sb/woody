@@ -6,7 +6,7 @@ import happy2b.woody.agct.resource.ResourceMethodManager;
 import happy2b.woody.agct.tool.AGCTPredicate;
 import happy2b.woody.api.id.IdGenerator;
 import happy2b.woody.api.id.ParametricIdGenerator;
-import net.bytebuddy.jar.asm.*;
+import org.objectweb.asm.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,7 +16,7 @@ import java.lang.reflect.Modifier;
 import java.security.ProtectionDomain;
 
 import static happy2b.woody.agct.resource.transform.ResourceMethodAdvice.*;
-import static net.bytebuddy.jar.asm.Opcodes.*;
+import static org.objectweb.asm.Opcodes.*;
 
 /**
  * @author jiangjibo

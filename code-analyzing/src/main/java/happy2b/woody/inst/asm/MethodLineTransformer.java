@@ -4,7 +4,7 @@ import happy2b.woody.util.MethodUtil;
 import happy2b.woody.util.bytecode.SourceCodeExtractor;
 import happy2b.woody.util.reflection.ReflectionUtils;
 import happy2b.woody.api.Config;
-import net.bytebuddy.jar.asm.*;
+import org.objectweb.asm.*;
 
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;

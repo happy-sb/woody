@@ -7,8 +7,8 @@ import happy2b.woody.api.Config;
 import happy2b.woody.api.MethodIntrospection;
 import happy2b.woody.api.LineVisitInfo;
 import happy2b.woody.inst.introspection.MethodLineOriginalIntrospection;
-import net.bytebuddy.jar.asm.Label;
-import net.bytebuddy.jar.asm.MethodVisitor;
+import org.objectweb.asm.Label;
+import org.objectweb.asm.MethodVisitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

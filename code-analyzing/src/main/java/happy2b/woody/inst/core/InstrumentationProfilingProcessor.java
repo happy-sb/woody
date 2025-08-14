@@ -8,8 +8,6 @@ import happy2b.woody.inst.asm.MethodLineTransformer;
 import happy2b.woody.inst.asm.ProfilingTransformer;
 import happy2b.woody.api.MethodIntrospection;
 import happy2b.woody.inst.stats.MethodProfilingManager;
-import net.bytebuddy.agent.builder.AgentBuilder;
-import net.bytebuddy.agent.builder.ResettableClassFileTransformer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -279,9 +277,6 @@ public class InstrumentationProfilingProcessor implements InstrumentationProfile
         if (transformer == null) {
             return;
         }
-        if (transformer instanceof ResettableClassFileTransformer) {
-            ((ResettableClassFileTransformer) transformer).reset(InstrumentationUtils.getInstrumentation(), AgentBuilder.RedefinitionStrategy.DISABLED);
-        }
         InstrumentationUtils.getInstrumentation().removeTransformer(transformer);
     }
 
@@ -350,9 +345,6 @@ public class InstrumentationProfilingProcessor implements InstrumentationProfile
     }
 
     public static void resetTransform(Class<?> clazz, ClassFileTransformer transformer) throws UnmodifiableClassException {
-        if (transformer instanceof ResettableClassFileTransformer) {
-            ((ResettableClassFileTransformer) transformer).reset(InstrumentationUtils.getInstrumentation(), AgentBuilder.RedefinitionStrategy.DISABLED);
-        }
         InstrumentationUtils.getInstrumentation().removeTransformer(transformer);
         InstrumentationUtils.getInstrumentation().retransformClasses(clazz);
     }

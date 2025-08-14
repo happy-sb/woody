@@ -2,14 +2,14 @@ package happy2b.woody.agct.resource.fetch.inst;
 
 import happy2b.woody.util.MethodUtil;
 import happy2b.woody.agct.tool.AGCTPredicate;
-import net.bytebuddy.jar.asm.*;
+import org.objectweb.asm.*;
 
 import java.lang.instrument.ClassFileTransformer;
 import java.security.ProtectionDomain;
 import java.util.Set;
 
 import static happy2b.woody.agct.resource.fetch.ResourceFetchingConst.*;
-import static net.bytebuddy.jar.asm.Opcodes.*;
+import static org.objectweb.asm.Opcodes.*;
 
 /**
  * @author jiangjibo

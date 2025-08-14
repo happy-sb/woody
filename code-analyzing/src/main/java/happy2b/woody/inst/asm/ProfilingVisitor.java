@@ -6,9 +6,9 @@ import happy2b.woody.inst.advice.ProfilingAdvice;
 import happy2b.woody.api.Config;
 import happy2b.woody.api.MethodIntrospection;
 import happy2b.woody.inst.tools.ProfilingEntity;
-import net.bytebuddy.jar.asm.Label;
-import net.bytebuddy.jar.asm.MethodVisitor;
-import net.bytebuddy.jar.asm.Opcodes;
+import org.objectweb.asm.Label;
+import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Opcodes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,7 +17,8 @@ import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.Map;
 
-import static net.bytebuddy.jar.asm.Opcodes.*;
+import static org.objectweb.asm.Opcodes.*;
+
 
 public class ProfilingVisitor extends MethodVisitor {
 
