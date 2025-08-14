@@ -18,6 +18,7 @@ public class ResourceMethodAdvice {
 
     public static final String ADVICE_CLASS = ResourceMethodAdvice.class.getName().replace(".", "/");
     public static final String PROFILING_TRACE_CLASS = ProfilingTrace.class.getName().replace(".", "/");
+    public static final String PROFILING_TRACE_CLASS_DESC = "L" + PROFILING_TRACE_CLASS + ";";
 
     public static final Method START_TRACE_METHOD;
     public static final Method START_TRACE_WITH_PARAM_METHOD;

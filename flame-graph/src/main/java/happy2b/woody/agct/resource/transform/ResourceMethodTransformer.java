@@ -1,11 +1,11 @@
 package happy2b.woody.agct.resource.transform;
 
-import happy2b.woody.util.MethodUtil;
 import happy2b.woody.agct.resource.ResourceMethod;
 import happy2b.woody.agct.resource.ResourceMethodManager;
 import happy2b.woody.agct.tool.AGCTPredicate;
 import happy2b.woody.api.id.IdGenerator;
 import happy2b.woody.api.id.ParametricIdGenerator;
+import happy2b.woody.util.MethodUtil;
 import org.objectweb.asm.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,7 +66,12 @@ public class ResourceMethodTransformer implements ClassFileTransformer {
             this.includeMethod = includeMethod;
             Method method = includeMethod.getMethod();
             this.isStatic = Modifier.isStatic(method.getModifiers());
-            this.localVarIndex = method.getParameterTypes().length + (isStatic ? 0 : 1);
+
+            int paramSlotCount = 0;
+            for (Class<?> paramType : method.getParameterTypes()) {
+                paramSlotCount += (paramType == long.class || paramType == double.class) ? 2 : 1;
+            }
+            this.localVarIndex = paramSlotCount + (isStatic ? 0 : 1);
         }
 
         @Override
@@ -109,6 +114,7 @@ public class ResourceMethodTransformer implements ClassFileTransformer {
             if ((opcode >= IRETURN && opcode <= RETURN) || opcode == ATHROW) {
                 mv.visitVarInsn(ALOAD, localVarIndex);
                 mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, PROFILING_TRACE_CLASS, FINISH_TRACE_METHOD.getName(), MethodUtil.getMethodDescriptor(FINISH_TRACE_METHOD), false);
+                mv.visitLabel(tryEndLabel);
             }
             super.visitInsn(opcode);
         }
@@ -140,7 +146,6 @@ public class ResourceMethodTransformer implements ClassFileTransformer {
 
         @Override
         public void visitMaxs(int maxStack, int maxLocals) {
-            mv.visitLabel(tryEndLabel);
             mv.visitTryCatchBlock(tryStartLabel, tryEndLabel, catchLabel, "java/lang/Throwable");
 
             mv.visitLabel(catchLabel);
@@ -154,9 +159,9 @@ public class ResourceMethodTransformer implements ClassFileTransformer {
             mv.visitInsn(ATHROW);
 
             mv.visitLabel(endLabel);
-            mv.visitLocalVariable("oneTrace", PROFILING_TRACE_CLASS, null, startLabel, endLabel, localVarIndex);
+            mv.visitLocalVariable("oneTrace", PROFILING_TRACE_CLASS_DESC, null, startLabel, endLabel, localVarIndex);
 
-            super.visitMaxs(maxStack, maxLocals);
+            super.visitMaxs(Math.max(maxStack, localVarIndex + 2), maxLocals);
         }
     }
 }
