@@ -178,7 +178,7 @@ public class MethodLineVisitor extends MethodVisitor {
         try {
             Class clazz = method.getDeclaringClass().getClassLoader().loadClass(owner.replace("/", "."));
             return isStaticMethod(clazz, name, desc);
-        } catch (Exception e) {
+        } catch (Throwable e) {
             log.error("databuff-profiling: Load class {} failed!", owner);
         }
         return false;

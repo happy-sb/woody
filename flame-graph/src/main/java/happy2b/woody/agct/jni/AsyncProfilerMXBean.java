@@ -41,7 +41,5 @@ public interface AsyncProfilerMXBean {
 
     <T> T[] getInstances(Class<T> clazz, int limit) throws IllegalStateException;
 
-    void filterThreads(List<Long> tidList);
-
-    void syncTidRsStackFrameDeepMap(Map<Long, Integer> deepMap);
+    void syncTidRsStackFrameHeightMap(Map<Long, Integer> heightMap);
 }

@@ -14,8 +14,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static happy2b.woody.agct.core.TraceManager.TID_RS_STACK_FRAME_DEEP_MAP;
-
 /**
  * @author jiangjibo
  * @version 1.0
@@ -54,15 +52,12 @@ public class FlameGraphProfiler {
             }
         }
 
-        List<Long> threadIds = TraceManager.collectResourceThreadIds(types);
-        if (threadIds.isEmpty()) {
+        Map<Long, Integer> tidRSFrameHeightMap = TraceManager.collectResourceThreadIdAndStackFrameHeight(types);
+
+        if (tidRSFrameHeightMap.isEmpty()) {
             throw new IllegalStateException("No resource thread found");
         }
-        asyncProfiler.filterThreads(threadIds);
-
-        if (!TID_RS_STACK_FRAME_DEEP_MAP.isEmpty()) {
-            asyncProfiler.syncTidRsStackFrameDeepMap(TID_RS_STACK_FRAME_DEEP_MAP);
-        }
+        asyncProfiler.syncTidRsStackFrameHeightMap(tidRSFrameHeightMap);
 
         TraceManager.startTracing();
 

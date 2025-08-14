@@ -41,7 +41,7 @@ public class ResourceClassManager {
         for (Class clazz : RESOURCE_CLASSES) {
             try {
                 InstrumentationUtils.getInstrumentation().retransformClasses(clazz);
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 log.error("One-Profiler: Retransform class '{}' occur exception!", clazz.getName(), e);
             }
         }

@@ -63,7 +63,8 @@ public class AsyncProfiler implements AsyncProfilerMXBean {
 
     private static File extractEmbeddedLib() {
         String platformTag = getPlatformTag();
-        String resourceName = "/libasyncProfiler.dylib";
+        String suffix = platformTag.contains("linux") ? "so" : "dylib";
+        String resourceName = "/libasyncProfiler." + suffix;
         InputStream in = AsyncProfiler.class.getResourceAsStream(resourceName);
         if (in == null) {
             return null;
@@ -71,7 +72,7 @@ public class AsyncProfiler implements AsyncProfilerMXBean {
 
         try {
             String extractPath = System.getProperty("one.profiler.extractPath");
-            File file = File.createTempFile("libasyncProfiler-", ".so",
+            File file = File.createTempFile("libasyncProfiler-.", suffix,
                     extractPath == null || extractPath.isEmpty() ? null : new File(extractPath));
             try (FileOutputStream out = new FileOutputStream(file)) {
                 byte[] buf = new byte[32000];
@@ -224,20 +225,11 @@ public class AsyncProfiler implements AsyncProfilerMXBean {
     }
 
     @Override
-    public void filterThreads(List<Long> tidList) {
-        long[] threadIds = new long[tidList.size()];
-        for (int i = 0; i < tidList.size(); i++) {
-            threadIds[i] = tidList.get(i);
-        }
-        filterThreads0(threadIds);
-    }
-
-    @Override
-    public void syncTidRsStackFrameDeepMap(Map<Long, Integer> deepMap) {
-        if (deepMap == null || deepMap.isEmpty()) {
+    public void syncTidRsStackFrameHeightMap(Map<Long, Integer> heightMap) {
+        if (heightMap == null || heightMap.isEmpty()) {
             throw new NullPointerException();
         }
-        syncTidRsStackFrameDeepMap0(deepMap);
+        syncTidRsStackFrameHeightMap0(heightMap);
     }
 
     private native Set<String> getSupportEvents0();
@@ -252,8 +244,6 @@ public class AsyncProfiler implements AsyncProfilerMXBean {
 
     private native void setResourceMethods0(ResourceMethod[] methods);
 
-    private native void filterThreads0(long[] threadIds);
-
-    private native void syncTidRsStackFrameDeepMap0(Map<Long, Integer> deepMap);
+    private native void syncTidRsStackFrameHeightMap0(Map<Long, Integer> heightMap);
 
 }

@@ -39,12 +39,12 @@ public class ResourceMethodTransformer implements ClassFileTransformer {
         ClassReader reader = new ClassReader(classfileBuffer);
         ClassWriter writer = new ClassWriter(reader, ClassWriter.COMPUTE_FRAMES);
 
-        reader.accept(new ClassVisitor(Opcodes.ASM7, writer) {
+        reader.accept(new ClassVisitor(Opcodes.ASM9, writer) {
             @Override
             public MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
                 MethodVisitor mv = super.visitMethod(access, name, descriptor, signature, exceptions);
                 ResourceMethod includeMethod = ResourceMethodManager.findProfilingIncludeMethod(classBeingRedefined.getName(), name, descriptor);
-                return includeMethod == null ? mv : new TracingMethodVisitor(Opcodes.ASM7, mv, includeMethod);
+                return includeMethod == null ? mv : new TracingMethodVisitor(Opcodes.ASM9, mv, includeMethod);
             }
         }, ClassReader.EXPAND_FRAMES);
         return writer.toByteArray();

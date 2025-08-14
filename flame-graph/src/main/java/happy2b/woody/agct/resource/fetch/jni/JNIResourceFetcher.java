@@ -67,11 +67,13 @@ public class JNIResourceFetcher implements IResourceFetcher {
             AsyncProfiler.getInstance().setResourceMethods(ResourceMethodManager.PROFILING_INCLUDE_METHODS);
 
             Map<String, Long> events = new HashMap<>();
-            events.put(ProfilingEvent.WALL.getSegment(), 50_000_000L);
+//            events.put(ProfilingEvent.WALL.getSegment(), 50_000_000L);
+//            events.put(ProfilingEvent.CPU.getSegment(), 5_000_000L);
+            events.put(ProfilingEvent.ALLOC.getSegment(), 50 * 1024L);
 
             try {
                 FlameGraphProfiler.startProfiling(events, ProfilingResourceType.HTTP, ProfilingResourceType.KAFKA);
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 throw new RuntimeException(e);
             }
 
@@ -88,7 +90,7 @@ public class JNIResourceFetcher implements IResourceFetcher {
             }
             Map<?, ?> handlerMethods = ReflectionUtils.invoke(instances[0], "getHandlerMethods");
             ResourceMethodFetchTool.fetchSpringWebResources(handlerMethods);
-        } catch (Exception e) {
+        } catch (Throwable e) {
             log.error("One-Profiler: Fetch http profiling resource occur exception", e);
         }
     }
@@ -105,7 +107,7 @@ public class JNIResourceFetcher implements IResourceFetcher {
                 Object ref = ReflectionUtils.get(instance, "ref");
                 ResourceMethodFetchTool.fetchDubboResources(interfaceClass, ref);
             }
-        } catch (Exception e) {
+        } catch (Throwable e) {
             log.error("One-Profiler: Fetch http profiling resource occur exception", e);
         }
     }
@@ -133,7 +135,7 @@ public class JNIResourceFetcher implements IResourceFetcher {
                     }
                 }
             }
-        } catch (Exception e) {
+        } catch (Throwable e) {
             log.error("One-Profiler: Fetch http profiling resource occur exception", e);
         }
     }
@@ -165,7 +167,7 @@ public class JNIResourceFetcher implements IResourceFetcher {
                 Object messageListener = ReflectionUtils.invoke(instance, "getRocketMQListener");
                 ResourceMethodFetchTool.fetchRocketMQResources_1(instance, messageListener);
             }
-        } catch (Exception e) {
+        } catch (Throwable e) {
             log.error("One-Profiler: Fetch rocketmq resource occur exception!", e);
         }
     }
@@ -185,7 +187,7 @@ public class JNIResourceFetcher implements IResourceFetcher {
                 }
                 ResourceMethodFetchTool.fetchRocketMQResources_2(instance, messageListener);
             }
-        } catch (Exception e) {
+        } catch (Throwable e) {
             log.error("One-Profiler: Fetch rocketmq resource occur exception!", e);
         }
     }
@@ -207,7 +209,7 @@ public class JNIResourceFetcher implements IResourceFetcher {
                 ResourceMethod resourceMethod = new ResourceMethod("kafka", "Consume Topic " + String.join(",", topics), method);
                 IResourceFetcher.addResourceMethod(resourceMethod);
             }
-        } catch (Exception e) {
+        } catch (Throwable e) {
             log.error("One-Profiler: Fetch kafka resource occur exception!", e);
         }
     }

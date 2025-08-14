@@ -21,17 +21,17 @@ import java.util.concurrent.ConcurrentHashMap;
 public class TraceManager {
 
     private static final Logger log = LoggerFactory.getLogger(TraceManager.class);
+
     private static Map<Long, ProfilingTraces> profilingTraces = new ConcurrentHashMap<>();
 
     static boolean tracingEnabled = false;
 
-    private static final Map<String, String> RESOURCE_TYPE_THREAD_GROUPS = new ConcurrentHashMap<>();
-
+    static final Map<String, String> RE_TYPE_THREAD_GROUPS = new ConcurrentHashMap<>();
+    static final Map<String, Integer> THREAD_GROUP_RS_STACK_FRAME_HEIGHT_MAP = new ConcurrentHashMap<>();
     static final ProfilingTrace NO_OP = new ProfilingTrace("NO_OP", null, null, 0);
 
     private static final ThreadMXBean THREAD_MX_BEAN = ManagementFactory.getThreadMXBean();
 
-    public static final Map<Long, Integer> TID_RS_STACK_FRAME_DEEP_MAP = new HashMap<>(128);
 
     public static void startTracing() {
         tracingEnabled = true;
@@ -43,8 +43,8 @@ public class TraceManager {
             profilingTraces.computeIfAbsent(tid, thread1 -> new ProfilingTraces()).startProfilingTrace(profilingTrace);
             return profilingTrace;
         }
-        if (!RESOURCE_TYPE_THREAD_GROUPS.containsKey(type)) {
-            RESOURCE_TYPE_THREAD_GROUPS.put(type, extractThreadGroupName(tid));
+        if (!RE_TYPE_THREAD_GROUPS.containsKey(type)) {
+            processThreadGroupName(type, tid, methodPath);
         }
         return NO_OP;
     }
@@ -56,35 +56,48 @@ public class TraceManager {
         return profilingTraces.get(tid).startProfilingSpan(spanId, time, operationName);
     }
 
-    static List<Long> collectResourceThreadIds(ProfilingResourceType... types) throws InterruptedException {
+    static Map<Long, Integer> collectResourceThreadIdAndStackFrameHeight(ProfilingResourceType... types) throws InterruptedException {
         int i = 0;
-        while (RESOURCE_TYPE_THREAD_GROUPS.size() < types.length) {
+        while (RE_TYPE_THREAD_GROUPS.size() < types.length) {
             if (i++ > 30) {
                 break;
             }
             Thread.sleep(1 * 1000);
         }
-        if (RESOURCE_TYPE_THREAD_GROUPS.size() < types.length) {
+        if (RE_TYPE_THREAD_GROUPS.size() < types.length) {
             for (ProfilingResourceType type : types) {
-                if (!RESOURCE_TYPE_THREAD_GROUPS.containsKey(type.getValue())) {
+                if (!RE_TYPE_THREAD_GROUPS.containsKey(type.getValue())) {
                     log.error("Failed to find resource type '{}' threads!", type.getValue());
                 }
             }
         }
-
-        List<Long> result = new ArrayList<>();
-        Collection<String> threadGroups = RESOURCE_TYPE_THREAD_GROUPS.values();
+        Map<Long, Integer> tidHeightMap = new HashMap<>(128);
         for (ThreadInfo threadInfo : THREAD_MX_BEAN.getThreadInfo(THREAD_MX_BEAN.getAllThreadIds())) {
-            if (threadGroups.contains(extractThreadGroupName(threadInfo.getThreadName()))) {
-                result.add(threadInfo.getThreadId());
+            String threadGroupName = extractThreadGroupName(threadInfo.getThreadName());
+            Integer height = THREAD_GROUP_RS_STACK_FRAME_HEIGHT_MAP.get(threadGroupName);
+            if (height != null) {
+                tidHeightMap.put(threadInfo.getThreadId(), height);
             }
         }
-        return result;
+        return tidHeightMap;
     }
 
-    private static String extractThreadGroupName(Long tid) {
-        ThreadInfo threadInfo = THREAD_MX_BEAN.getThreadInfo(tid);
-        return extractThreadGroupName(threadInfo.getThreadName());
+    private static void processThreadGroupName(String type, Long tid, String methodPath) {
+        ThreadInfo threadInfo = THREAD_MX_BEAN.getThreadInfo(tid, Integer.MAX_VALUE);
+        String threadGroupName = extractThreadGroupName(threadInfo.getThreadName());
+
+        RE_TYPE_THREAD_GROUPS.put(type, threadGroupName);
+
+        StackTraceElement[] stackTrace = threadInfo.getStackTrace();
+        for (int i = 0; i < stackTrace.length; i++) {
+            StackTraceElement element = stackTrace[i];
+            String className = element.getClassName();
+            String methodName = element.getMethodName();
+            if (methodPath.startsWith(className) && methodPath.endsWith(methodName)) {
+                THREAD_GROUP_RS_STACK_FRAME_HEIGHT_MAP.put(threadGroupName, stackTrace.length - i);
+                break;
+            }
+        }
     }
 
     private static String extractThreadGroupName(String threadName) {
