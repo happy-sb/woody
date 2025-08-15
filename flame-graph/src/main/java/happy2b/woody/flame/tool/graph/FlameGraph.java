@@ -6,13 +6,11 @@
 package happy2b.woody.flame.tool.graph;
 
 import happy2b.woody.flame.common.dto.ProfilingSample;
+import happy2b.woody.flame.common.dto.ProfilingSampleBase;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
-import java.util.StringTokenizer;
+import java.util.*;
 import java.util.regex.Pattern;
 
 import static happy2b.woody.flame.tool.graph.Frame.*;
@@ -67,9 +65,9 @@ public class FlameGraph implements Comparator<Frame> {
         }
     }
 
-    public void parseProfilingSamples(List<ProfilingSample> samples) {
+    public void parseProfilingSamples(List<ProfilingSample> samples, Map<String, ProfilingSampleBase> sampleBaseMap) {
         for (ProfilingSample sample : samples) {
-            addSample(sample);
+            addSample(sample, sampleBaseMap.get(sample.getResource()));
         }
     }
 
@@ -180,16 +178,22 @@ public class FlameGraph implements Comparator<Frame> {
         depth = Math.max(depth, stack.size);
     }
 
-    public void addSample(ProfilingSample sample) {
+    public void addSample(ProfilingSample sample, ProfilingSampleBase sampleBase) {
         Frame frame = root;
-        List<String> stackTraces = sample.getStackTraces();
         int ticks = sample.getTicks();
+
+        List<String> bases = sampleBase.getStackTraces();
+        for (int i = bases.size() - 1; i >= 0; i--) {
+            frame = addChild(frame, bases.get(i), (byte) (sampleBase.getFrameTypeIds().charAt(i) - '0'), ticks);
+        }
+
+        List<String> stackTraces = sample.getStackTraces();
         for (int i = sample.getRsFlagIndex(); i >= 0; i--) {
             frame = addChild(frame, stackTraces.get(i), (byte) (sample.getFrameTypeIds().charAt(i) - '0'), ticks);
         }
         frame.total += ticks;
         frame.self += ticks;
-        depth = Math.max(depth, stackTraces.size());
+        depth = Math.max(depth, bases.size() + stackTraces.size());
     }
 
     public void dump(PrintStream out) {
@@ -425,16 +429,12 @@ public class FlameGraph implements Comparator<Frame> {
         }
     }
 
-    public static void convert(List<ProfilingSample> samples, String output) throws IOException {
+    public static void convert(List<ProfilingSample> samples, Map<String, ProfilingSampleBase> sampleBaseMap, String output) throws IOException {
         FlameGraph fg = new FlameGraph(new Arguments(null));
-        fg.parseProfilingSamples(samples);
+        fg.parseProfilingSamples(samples, sampleBaseMap);
         try (PrintStream out = new PrintStream(output, "UTF-8")) {
             fg.dump(out);
         }
     }
 
-    public static void main(String[] args) throws IOException {
-        Arguments arguments = new Arguments(null);
-        convert("/Users/jiangjibo/Downloads/cpu_collapsed.txt", "/Users/jiangjibo/Downloads/cpu_flame.html", arguments);
-    }
 }

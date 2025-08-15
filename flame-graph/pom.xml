@@ -59,7 +59,7 @@
                     </descriptorRefs>
                     <archive>
                         <manifestEntries>
-                            <Premain-Class>happy2b.woody.flame.AGCTProfilerBootstrap</Premain-Class>
+                            <Premain-Class>happy2b.woody.flame.FlameGraphProfilerBootstrap</Premain-Class>
                             <Can-Redefine-Classes>true</Can-Redefine-Classes>
                             <Can-Retransform-Classes>true</Can-Retransform-Classes>
                         </manifestEntries>

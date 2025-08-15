@@ -1,5 +1,10 @@
 package happy2b.woody.flame.resource.fetch.jni;
 
+import happy2b.woody.flame.common.dto.ProfilingSample;
+import happy2b.woody.flame.common.dto.ProfilingSampleBase;
+import happy2b.woody.flame.core.TraceManager;
+import happy2b.woody.flame.tool.ProfilingSampleProcessor;
+import happy2b.woody.flame.tool.graph.FlameGraph;
 import happy2b.woody.util.bytecode.InstrumentationUtils;
 import happy2b.woody.util.reflection.ReflectionUtils;
 import happy2b.woody.flame.common.constant.ProfilingEvent;
@@ -17,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static happy2b.woody.flame.resource.fetch.ResourceFetchingConst.*;
 
@@ -35,7 +41,7 @@ public class JNIResourceFetcher implements IResourceFetcher {
     public void bootstrap(ProfilingResourceType... types) {
         new Thread(() -> {
             try {
-                Thread.sleep(30 * 1000);
+                Thread.sleep(60 * 1000);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
@@ -61,24 +67,39 @@ public class JNIResourceFetcher implements IResourceFetcher {
                     fetchKafkaResources(clazz);
                 }
             }
-
             ResourceClassManager.INSTANCE.retransformResourceClasses();
 
-            AsyncProfiler.getInstance().setResourceMethods(ResourceMethodManager.PROFILING_INCLUDE_METHODS);
-
-            Map<String, Long> events = new HashMap<>();
-//            events.put(ProfilingEvent.WALL.getSegment(), 50_000_000L);
-            events.put(ProfilingEvent.CPU.getSegment(), 5_000_000L);
-//            events.put(ProfilingEvent.ALLOC.getSegment(), 500 * 1024L);
-
-            try {
-                FlameGraphProfiler.startProfiling(events, types);
-            } catch (Throwable e) {
-                throw new RuntimeException(e);
-            }
+            doProfiling(types);
 
         }).start();
 
+    }
+
+    private void doProfiling(ProfilingResourceType... types) {
+        try {
+            AsyncProfiler.getInstance().setResourceMethods(ResourceMethodManager.PROFILING_INCLUDE_METHODS);
+
+            Map<String, Long> events = new HashMap<>();
+//            events.put(ProfilingEvent.ALLOC.getSegment(), 500 * 1024L);
+            events.put(ProfilingEvent.WALL.getSegment(), 50_000_000L);
+            events.put(ProfilingEvent.CPU.getSegment(), 5_000_000L);
+
+            FlameGraphProfiler.startProfiling(events, types);
+
+            Thread.sleep(60 * 1000);
+
+            List<ProfilingSample> profilingSamples = FlameGraphProfiler.finishProfiling();
+
+            ProfilingSampleProcessor.populateTracingInfo(profilingSamples, TraceManager.profilingTraces);
+            Map<String, ProfilingSampleBase> sampleBaseMap = ProfilingSampleProcessor.extractSampleBase(profilingSamples);
+
+            Map<String, List<ProfilingSample>> eventSamples = profilingSamples.stream().collect(Collectors.groupingBy(ProfilingSample::getEventType));
+            for (Map.Entry<String, List<ProfilingSample>> entry : eventSamples.entrySet()) {
+                FlameGraph.convert(entry.getValue(), sampleBaseMap, "/Users/jiangjibo/Downloads/" + entry.getKey() + "_flameGraph.html");
+            }
+        } catch (Throwable e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private void fetchSpringWebResources(Class clazz) {

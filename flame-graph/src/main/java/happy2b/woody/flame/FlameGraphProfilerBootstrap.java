@@ -12,11 +12,11 @@ import java.lang.instrument.Instrumentation;
  * @version 1.0
  * @since 2025/7/22
  */
-public class AGCTProfilerBootstrap {
+public class FlameGraphProfilerBootstrap {
     public static void premain(String agentArgs, Instrumentation inst) {
         InstrumentationUtils.setInstrumentation(inst);
 //        InstResourceFetcher.INSTANCE.bootstrap();
-        JNIResourceFetcher.INSTANCE.bootstrap(ProfilingResourceType.GRPC);
+        JNIResourceFetcher.INSTANCE.bootstrap(ProfilingResourceType.GRPC, ProfilingResourceType.HTTP, ProfilingResourceType.DUBBO, ProfilingResourceType.ROCKETMQ);
         AsyncProfiler.getInstance();
     }
 }
