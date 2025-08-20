@@ -5,7 +5,7 @@ import happy2b.woody.flame.resource.ResourceMethodManager;
 import happy2b.woody.flame.tool.AGCTPredicate;
 import happy2b.woody.api.id.IdGenerator;
 import happy2b.woody.api.id.ParametricIdGenerator;
-import happy2b.woody.util.MethodUtil;
+import happy2b.woody.util.common.MethodUtil;
 import org.objectweb.asm.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

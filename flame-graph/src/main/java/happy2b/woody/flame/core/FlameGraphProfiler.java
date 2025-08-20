@@ -1,25 +1,19 @@
 package happy2b.woody.flame.core;
 
 import happy2b.woody.flame.common.constant.ProfilingResourceType;
-import happy2b.woody.flame.tool.graph.FlameGraph;
 import happy2b.woody.flame.tool.jni.AsyncProfiler;
 import happy2b.woody.flame.common.dto.ProfilingSample;
-import happy2b.woody.flame.common.dto.ProfilingSampleBase;
 import happy2b.woody.flame.resource.ResourceMethodManager;
 import happy2b.woody.flame.resource.fetch.inst.ResourcesExtractor;
 import happy2b.woody.flame.tool.ProfilingSampleProcessor;
 import happy2b.woody.api.id.IdGenerator;
-import happy2b.woody.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.lang.reflect.Method;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * @author jiangjibo

@@ -1,6 +1,6 @@
 package happy2b.woody.inst.asm;
 
-import happy2b.woody.util.MethodUtil;
+import happy2b.woody.util.common.MethodUtil;
 import happy2b.woody.util.bytecode.SourceCodeExtractor;
 import happy2b.woody.util.reflection.ReflectionUtils;
 import happy2b.woody.api.Config;

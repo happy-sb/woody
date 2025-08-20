@@ -13,10 +13,18 @@ import java.lang.instrument.Instrumentation;
  * @since 2025/7/22
  */
 public class FlameGraphProfilerBootstrap {
+
+    public static void agentmain(String agentArgs, Instrumentation inst) {
+        premain(agentArgs, inst);
+    }
+
     public static void premain(String agentArgs, Instrumentation inst) {
         InstrumentationUtils.setInstrumentation(inst);
+        System.out.println(agentArgs);
 //        InstResourceFetcher.INSTANCE.bootstrap();
         JNIResourceFetcher.INSTANCE.bootstrap(ProfilingResourceType.GRPC, ProfilingResourceType.HTTP, ProfilingResourceType.DUBBO, ProfilingResourceType.ROCKETMQ);
         AsyncProfiler.getInstance();
     }
+
+
 }

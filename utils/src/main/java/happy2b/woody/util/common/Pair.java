@@ -1,4 +1,4 @@
-package happy2b.woody.util;
+package happy2b.woody.util.common;
 
 import java.util.Objects;
 

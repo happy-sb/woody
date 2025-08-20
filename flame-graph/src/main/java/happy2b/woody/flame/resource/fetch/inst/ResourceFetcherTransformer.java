@@ -1,6 +1,6 @@
 package happy2b.woody.flame.resource.fetch.inst;
 
-import happy2b.woody.util.MethodUtil;
+import happy2b.woody.util.common.MethodUtil;
 import happy2b.woody.flame.tool.AGCTPredicate;
 import org.objectweb.asm.*;
 

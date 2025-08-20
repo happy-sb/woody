@@ -1,6 +1,6 @@
 package happy2b.woody.inst.asm;
 
-import happy2b.woody.util.MethodUtil;
+import happy2b.woody.util.common.MethodUtil;
 import org.objectweb.asm.*;
 
 import java.lang.instrument.ClassFileTransformer;

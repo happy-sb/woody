@@ -1,6 +1,6 @@
 package happy2b.woody.inst.introspection;
 
-import happy2b.woody.util.Pair;
+import happy2b.woody.util.common.Pair;
 import happy2b.woody.api.Config;
 import happy2b.woody.api.LineVisitInfo;
 import happy2b.woody.api.MethodIntrospection;

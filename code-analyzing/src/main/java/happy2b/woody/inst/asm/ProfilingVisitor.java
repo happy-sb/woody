@@ -1,7 +1,7 @@
 package happy2b.woody.inst.asm;
 
-import happy2b.woody.util.MethodUtil;
-import happy2b.woody.util.Pair;
+import happy2b.woody.util.common.MethodUtil;
+import happy2b.woody.util.common.Pair;
 import happy2b.woody.inst.advice.ProfilingAdvice;
 import happy2b.woody.api.Config;
 import happy2b.woody.api.MethodIntrospection;

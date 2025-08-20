@@ -1,7 +1,7 @@
 package happy2b.woody.api;
 
 
-import happy2b.woody.util.Pair;
+import happy2b.woody.util.common.Pair;
 
 import java.lang.reflect.Method;
 import java.util.*;

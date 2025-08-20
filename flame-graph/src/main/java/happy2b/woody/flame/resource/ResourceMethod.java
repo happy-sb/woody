@@ -1,7 +1,7 @@
 package happy2b.woody.flame.resource;
 
 
-import happy2b.woody.util.MethodUtil;
+import happy2b.woody.util.common.MethodUtil;
 import happy2b.woody.api.id.IdGenerator;
 
 import java.lang.reflect.Method;

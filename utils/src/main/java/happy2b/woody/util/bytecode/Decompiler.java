@@ -1,7 +1,7 @@
 package happy2b.woody.util.bytecode;
 
-import happy2b.woody.util.MethodUtil;
-import happy2b.woody.util.Pair;
+import happy2b.woody.util.common.MethodUtil;
+import happy2b.woody.util.common.Pair;
 import happy2b.woody.util.reflection.ReflectionUtils;
 import org.benf.cfr.reader.api.CfrDriver;
 import org.benf.cfr.reader.api.OutputSinkFactory;

@@ -6,7 +6,7 @@
     <parent>
         <groupId>happy2b</groupId>
         <artifactId>woody</artifactId>
-        <version>1.0</version>
+        <version>1.0.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>code-analyzing</artifactId>
@@ -20,13 +20,11 @@
     <dependencies>
         <dependency>
             <groupId>happy2b</groupId>
-            <artifactId>profiler-utils</artifactId>
-            <version>1.0</version>
+            <artifactId>woody-utils</artifactId>
         </dependency>
         <dependency>
             <groupId>happy2b</groupId>
             <artifactId>profiler-api</artifactId>
-            <version>1.0</version>
         </dependency>
         <dependency>
             <groupId>org.ow2.asm</groupId>

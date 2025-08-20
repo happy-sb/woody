@@ -6,7 +6,7 @@
     <parent>
         <groupId>happy2b</groupId>
         <artifactId>woody</artifactId>
-        <version>1.0</version>
+        <version>1.0.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>flame-graph</artifactId>
@@ -20,13 +20,11 @@
     <dependencies>
         <dependency>
             <groupId>happy2b</groupId>
-            <artifactId>profiler-utils</artifactId>
-            <version>1.0</version>
+            <artifactId>woody-utils</artifactId>
         </dependency>
         <dependency>
             <groupId>happy2b</groupId>
             <artifactId>profiler-api</artifactId>
-            <version>1.0</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -46,38 +44,4 @@
         </dependency>
 
     </dependencies>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <version>3.6.0</version>
-                <configuration>
-                    <descriptorRefs>
-                        <descriptorRef>jar-with-dependencies</descriptorRef>
-                    </descriptorRefs>
-                    <archive>
-                        <manifestEntries>
-                            <Premain-Class>happy2b.woody.flame.FlameGraphProfilerBootstrap</Premain-Class>
-                            <Can-Redefine-Classes>true</Can-Redefine-Classes>
-                            <Can-Retransform-Classes>true</Can-Retransform-Classes>
-                        </manifestEntries>
-                    </archive>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>make-assembly</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-
-
-        </plugins>
-    </build>
-
 </project>
