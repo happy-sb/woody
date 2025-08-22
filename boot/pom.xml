@@ -11,12 +11,28 @@
     <dependencies>
         <dependency>
             <groupId>happy2b</groupId>
-            <artifactId>woody-utils</artifactId>
+            <artifactId>woody-common</artifactId>
         </dependency>
 
         <dependency>
-            <groupId>happy2b</groupId>
-            <artifactId>woody-client</artifactId>
+            <groupId>org.jline</groupId>
+            <artifactId>jline</artifactId>
+            <version>3.30.4</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-transport</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-codec-http</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.squareup.moshi</groupId>
+            <artifactId>moshi</artifactId>
         </dependency>
 
         <dependency>

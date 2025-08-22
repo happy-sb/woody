@@ -1,9 +1,9 @@
 package happy2b.woody.inst.introspection;
 
-import happy2b.woody.util.common.Pair;
-import happy2b.woody.api.Config;
-import happy2b.woody.api.LineVisitInfo;
-import happy2b.woody.api.MethodIntrospection;
+import happy2b.woody.common.utils.Pair;
+import happy2b.woody.common.api.Config;
+import happy2b.woody.common.api.LineVisitInfo;
+import happy2b.woody.common.api.MethodIntrospection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

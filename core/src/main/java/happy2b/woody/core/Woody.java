@@ -3,8 +3,8 @@ package happy2b.woody.core;
 import com.sun.tools.attach.VirtualMachine;
 import com.sun.tools.attach.VirtualMachineDescriptor;
 import happy2b.woody.core.config.Configure;
-import happy2b.woody.util.common.AnsiLog;
-import happy2b.woody.util.common.JavaVersionUtils;
+import happy2b.woody.common.utils.AnsiLog;
+import happy2b.woody.common.utils.JavaVersionUtils;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;

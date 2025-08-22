@@ -2,8 +2,8 @@ package happy2b.woody.inst;
 
 
 
-import happy2b.woody.util.bytecode.InstrumentationUtils;
-import happy2b.woody.api.InstrumentationProfiler;
+import happy2b.woody.common.bytecode.InstrumentationUtils;
+import happy2b.woody.common.api.InstrumentationProfiler;
 import happy2b.woody.inst.core.InstrumentationProfilingProcessor;
 
 import java.lang.instrument.Instrumentation;

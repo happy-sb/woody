@@ -1,0 +1,138 @@
+package happy2b.woody.core.flame.resource.fetch;
+
+import happy2b.woody.common.bytecode.InstrumentationUtils;
+import happy2b.woody.core.flame.resource.ResourceMethod;
+import happy2b.woody.core.flame.resource.ResourceMethodManager;
+import happy2b.woody.core.flame.resource.fetch.plugin.*;
+
+import java.util.*;
+
+/**
+ * @author jiangjibo
+ * @version 1.0
+ * @since 2025/8/21
+ */
+public class ResourceFetcherManager {
+
+    private static List<String> allAvailableResourceTypes;
+    private static final Map<String, ResourceFetcher> allResourceFetchers = new HashMap<>();
+
+    private static void addResourceFetcher(ResourceFetcher fetcher) {
+        allResourceFetchers.put(fetcher.resourceType().getValue(), fetcher);
+    }
+
+    static {
+        addResourceFetcher(SpringWebResourceFetcher.INSTANCE);
+        addResourceFetcher(GrpcResourceFetcher.INSTANCE);
+        addResourceFetcher(DubboResourceFetcher.INSTANCE);
+        addResourceFetcher(RocketMQResourceFetcher.INSTANCE);
+        addResourceFetcher(KafkaResourceFetcher.INSTANCE);
+    }
+
+    public static void selectResource(String... resourceTypes) {
+        for (String resourceType : resourceTypes) {
+            ResourceFetcher fetcher = allResourceFetchers.get(resourceType);
+            if (fetcher == null) {
+                throw new IllegalArgumentException("resourceType is not valid: " + resourceType);
+            }
+            Set<ResourceMethod> methods = ResourceMethodManager.getResourceByType(resourceType);
+            if (methods == null) {
+                List<Class> classList = InstrumentationUtils.findClass(fetcher.getResourceClassName());
+                if (!classList.isEmpty()) {
+                    for (Class clazz : classList) {
+                        fetcher.fetchResources(clazz);
+                    }
+                }
+                methods = ResourceMethodManager.getResourceByType(resourceType);
+            }
+            ResourceMethodManager.addSelectedResourceMethod(methods);
+        }
+    }
+
+    public static void selectResource(String resourceType, String... resources) {
+        if (!allResourceFetchers.containsKey(resourceType)) {
+            throw new IllegalArgumentException("resourceType is not valid: " + resourceType);
+        }
+        Set<ResourceMethod> methods = ResourceMethodManager.getResourceByType(resourceType);
+        for (ResourceMethod method : methods) {
+            for (String resource : resources) {
+                if (method.getResource().equals(resource)) {
+                    ResourceMethodManager.addSelectedResourceMethod(method);
+                }
+            }
+        }
+    }
+
+    public static List<String> listAllAvailableResourceTypes() {
+        if (allAvailableResourceTypes != null) {
+            return allAvailableResourceTypes;
+        }
+        List<String> classes = new ArrayList<>();
+        for (ResourceFetcher value : allResourceFetchers.values()) {
+            for (String clazz : value.getResourceClassName()) {
+                classes.add(clazz);
+            }
+        }
+        List<String> types = new ArrayList<>();
+        List<Class> selectClasses = InstrumentationUtils.findClass(classes.toArray(new String[0]));
+        for (Class selectClass : selectClasses) {
+            for (ResourceFetcher fetcher : allResourceFetchers.values()) {
+                if (fetcher.isSupport(selectClass)) {
+                    types.add(fetcher.resourceType().getValue());
+                    break;
+                }
+            }
+        }
+        allAvailableResourceTypes = Collections.unmodifiableList(types);
+        return types;
+    }
+
+    public static Set<ResourceMethod> listSelectedResources(String resourceType) {
+        return ResourceMethodManager.getSelectedResourceByType(resourceType);
+    }
+
+    public static Map<String, Set<ResourceMethod>> listAllSelectedResources() {
+        if (allAvailableResourceTypes == null) {
+            listAllAvailableResourceTypes();
+        }
+        Map<String, Set<ResourceMethod>> result = new HashMap<>();
+        for (String resourceType : allAvailableResourceTypes) {
+            Set<ResourceMethod> methods = listSelectedResources(resourceType);
+            if (!methods.isEmpty()) {
+                result.put(resourceType, methods);
+            }
+        }
+        return result;
+    }
+
+    public static Set<ResourceMethod> listResources(String resourceType) {
+        ResourceFetcher fetcher = allResourceFetchers.get(resourceType);
+        Set<ResourceMethod> methods = ResourceMethodManager.getResourceByType(resourceType);
+        if (methods.isEmpty()) {
+            List<Class> classList = InstrumentationUtils.findClass(fetcher.getResourceClassName());
+            if (!classList.isEmpty()) {
+                for (Class clazz : classList) {
+                    fetcher.fetchResources(clazz);
+                }
+            }
+            methods = ResourceMethodManager.getResourceByType(resourceType);
+        }
+        return methods;
+    }
+
+    public static Map<String, Set<ResourceMethod>> listAllResources() {
+        if (allAvailableResourceTypes == null) {
+            listAllAvailableResourceTypes();
+        }
+        Map<String, Set<ResourceMethod>> result = new HashMap<>();
+        for (String resourceType : allAvailableResourceTypes) {
+            Set<ResourceMethod> methods = listResources(resourceType);
+            if (!methods.isEmpty()) {
+                result.put(resourceType, methods);
+            }
+        }
+        return result;
+    }
+
+
+}

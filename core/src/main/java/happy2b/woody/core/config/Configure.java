@@ -1,6 +1,6 @@
 package happy2b.woody.core.config;
 
-import happy2b.woody.util.reflection.ReflectionUtils;
+import happy2b.woody.common.reflection.ReflectionUtils;
 
 import java.lang.reflect.Field;
 import java.util.HashMap;
@@ -8,33 +8,12 @@ import java.util.Map;
 
 import static java.lang.reflect.Modifier.isStatic;
 
-/**
- * <pre>
- * 配置类。
- * 注意本类里的所有字段不能有默认值，否则会出现配置混乱。
- * 在 com.taobao.arthas.core.Arthas#attach 里会调用 Configure#toStrig
- * <pre>
- *
- * @author vlinux
- * @author hengyunabc 2018-11-12
- */
 public class Configure {
 
-    private String ip;
     private Integer serverPort;
     private Integer javaPid;
     private String woodyCore;
     private String woodyAgent;
-
-
-    public String getIp() {
-        return ip;
-    }
-
-    public void setIp(String ip) {
-        this.ip = ip;
-    }
-
 
     public Integer getJavaPid() {
         return javaPid;

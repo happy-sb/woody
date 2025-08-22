@@ -1,7 +1,7 @@
 package happy2b.woody.inst.tools;
 
 
-import happy2b.woody.api.MethodIntrospection;
+import happy2b.woody.common.api.MethodIntrospection;
 
 public class ProfilingEntity {
     public long cpuSnapshot;

@@ -1,8 +1,7 @@
 package happy2b.woody.boot;
 
-import happy2b.woody.client.WoodyClient;
-import happy2b.woody.util.common.AnsiLog;
-import happy2b.woody.util.common.PortUtils;
+import happy2b.woody.common.utils.AnsiLog;
+import happy2b.woody.common.utils.PortUtils;
 
 import java.io.File;
 import java.security.CodeSource;
@@ -66,6 +65,10 @@ public class Bootstrap {
 
         // 启动woody-client
         AnsiLog.info("woody-client connect {} {}", "127.0.0.1", availablePort);
+
+        System.setProperty("jline.terminal", "org.jline.terminal.impl.PosixTerminal");
+        System.setProperty("jline.terminal.dumb", "false");
+
         new WoodyClient("127.0.0.1", availablePort, pid).boot();
     }
 

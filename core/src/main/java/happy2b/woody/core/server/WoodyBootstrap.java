@@ -1,5 +1,6 @@
 package happy2b.woody.core.server;
 
+import happy2b.woody.common.bytecode.InstrumentationUtils;
 import happy2b.woody.core.config.Configure;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
@@ -38,7 +39,6 @@ public class WoodyBootstrap {
     private int pid;
 
     private AtomicBoolean isBindRef = new AtomicBoolean(false);
-    private Instrumentation instrumentation;
 
     private Thread shutdown;
     private ExecutorService executorService;
@@ -53,8 +53,8 @@ public class WoodyBootstrap {
     private WoodyBootstrap(Configure configure, Instrumentation instrumentation) throws Throwable {
         this.configure = configure;
         this.pid = configure.getJavaPid();
-        this.instrumentation = instrumentation;
 
+        InstrumentationUtils.setInstrumentation(instrumentation);
 
         executorService = Executors.newCachedThreadPool(new ThreadFactory() {
             @Override
@@ -89,6 +89,10 @@ public class WoodyBootstrap {
         Runtime.getRuntime().addShutdownHook(shutdown);
     }
 
+    public static WoodyBootstrap getInstance() {
+        return bootstrapInstance;
+    }
+
     public static WoodyBootstrap getInstance(Instrumentation instrumentation, String args) throws Throwable {
         if (bootstrapInstance != null) {
             return bootstrapInstance;
@@ -118,17 +122,7 @@ public class WoodyBootstrap {
                         protected void initChannel(SocketChannel ch) {
                             ch.pipeline().addLast(new StringDecoder());
                             ch.pipeline().addLast(new StringEncoder());
-                            ch.pipeline().addLast(new ChannelInboundHandlerAdapter() {
-                                @Override
-                                public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-                                    if (msg.equals("stop")) {
-                                        System.out.println("STOP");
-                                        destroy();
-                                    }else{
-                                        ctx.writeAndFlush(System.currentTimeMillis() + "\r\n" + "asdfasdfasda");
-                                    }
-                                }
-                            });
+                            ch.pipeline().addLast(new WoodyServerHandler());
                         }
                     });
 
@@ -142,7 +136,6 @@ public class WoodyBootstrap {
             isBindRef.set(false);
             throw e;
         } finally {
-            // 优雅关闭事件循环组
             bossGroup.shutdownGracefully().sync();
             workerGroup.shutdownGracefully().sync();
         }
@@ -154,6 +147,7 @@ public class WoodyBootstrap {
     }
 
     public void destroy() {
+        serverChannel.writeAndFlush("stop");
         executorService.shutdownNow();
         if (serverChannel != null) {
             serverChannel.close();
@@ -164,5 +158,6 @@ public class WoodyBootstrap {
         if (workerGroup != null) {
             workerGroup.shutdownGracefully();
         }
+        bootstrapInstance = null;
     }
 }

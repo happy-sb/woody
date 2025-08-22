@@ -1,12 +1,11 @@
 package happy2b.woody.boot;
 
 
-import happy2b.woody.util.common.*;
+import happy2b.woody.common.utils.*;
 
-import java.io.*;
-import java.lang.reflect.Method;
-import java.net.URL;
-import java.net.URLClassLoader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.*;
 
 /**
@@ -16,24 +15,6 @@ import java.util.*;
  */
 public class ProcessUtils {
     private static String FOUND_JAVA_HOME = null;
-
-    //status code from com.taobao.arthas.client.TelnetConsole
-    /**
-     * Process success
-     */
-    public static final int STATUS_OK = 0;
-    /**
-     * Generic error
-     */
-    public static final int STATUS_ERROR = 1;
-    /**
-     * Execute commands timeout
-     */
-    public static final int STATUS_EXEC_TIMEOUT = 100;
-    /**
-     * Execute commands error
-     */
-    public static final int STATUS_EXEC_ERROR = 101;
 
     @SuppressWarnings("resource")
     public static long select(boolean v) throws InputMismatchException {
@@ -266,52 +247,6 @@ public class ProcessUtils {
             }
         } catch (Throwable e) {
             // ignore
-        }
-    }
-
-    public static int startArthasClient(String arthasHomeDir, List<String> telnetArgs, OutputStream out) throws Throwable {
-        // start java telnet client
-        // find arthas-client.jar
-        URLClassLoader classLoader = new URLClassLoader(
-                new URL[]{new File(arthasHomeDir, "arthas-client.jar").toURI().toURL()});
-        Class<?> telnetConsoleClass = classLoader.loadClass("com.taobao.arthas.client.TelnetConsole");
-        Method processMethod = telnetConsoleClass.getMethod("process", String[].class);
-
-        //redirect System.out/System.err
-        PrintStream originSysOut = System.out;
-        PrintStream originSysErr = System.err;
-        PrintStream newOut = new PrintStream(out);
-        PrintStream newErr = new PrintStream(out);
-
-        // call TelnetConsole.process()
-        // fix https://github.com/alibaba/arthas/issues/833
-        ClassLoader tccl = Thread.currentThread().getContextClassLoader();
-        try {
-            System.setOut(newOut);
-            System.setErr(newErr);
-            Thread.currentThread().setContextClassLoader(classLoader);
-            return (Integer) processMethod.invoke(null, new Object[]{telnetArgs.toArray(new String[0])});
-        } catch (Throwable e) {
-            //java.lang.reflect.InvocationTargetException : java.net.ConnectException
-            e = e.getCause();
-            if (e instanceof IOException || e instanceof InterruptedException) {
-                // ignore connection error and interrupted error
-                return STATUS_ERROR;
-            } else {
-                // process error
-                AnsiLog.error("process error: {}", e.toString());
-                AnsiLog.error(e);
-                return STATUS_EXEC_ERROR;
-            }
-        } finally {
-            Thread.currentThread().setContextClassLoader(tccl);
-
-            //reset System.out/System.err
-            System.setOut(originSysOut);
-            System.setErr(originSysErr);
-            //flush output
-            newOut.flush();
-            newErr.flush();
         }
     }
 

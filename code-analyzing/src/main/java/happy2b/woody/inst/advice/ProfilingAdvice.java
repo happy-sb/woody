@@ -1,9 +1,9 @@
 package happy2b.woody.inst.advice;
 
-import happy2b.woody.util.common.MethodUtil;
-import happy2b.woody.util.reflection.ReflectionUtils;
-import happy2b.woody.api.Config;
-import happy2b.woody.api.MethodIntrospection;
+import happy2b.woody.common.utils.MethodUtil;
+import happy2b.woody.common.reflection.ReflectionUtils;
+import happy2b.woody.common.api.Config;
+import happy2b.woody.common.api.MethodIntrospection;
 import happy2b.woody.inst.stats.MethodProfilingManager;
 import happy2b.woody.inst.tools.ProfilingEntity;
 import org.slf4j.Logger;

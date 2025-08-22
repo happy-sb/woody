@@ -1,10 +1,10 @@
 package happy2b.woody.inst.asm;
 
-import happy2b.woody.util.common.MethodUtil;
-import happy2b.woody.util.common.Pair;
+import happy2b.woody.common.utils.MethodUtil;
+import happy2b.woody.common.utils.Pair;
 import happy2b.woody.inst.advice.ProfilingAdvice;
-import happy2b.woody.api.Config;
-import happy2b.woody.api.MethodIntrospection;
+import happy2b.woody.common.api.Config;
+import happy2b.woody.common.api.MethodIntrospection;
 import happy2b.woody.inst.tools.ProfilingEntity;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
