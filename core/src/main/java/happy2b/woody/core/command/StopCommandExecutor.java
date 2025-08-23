@@ -23,7 +23,7 @@ public class StopCommandExecutor implements WoodyCommandExecutor {
     }
 
     @Override
-    public void execute(WoodyCommand command) {
+    public void executeInternal(WoodyCommand command) {
         WoodyBootstrap instance = WoodyBootstrap.getInstance();
         if (instance != null) {
             instance.destroy();

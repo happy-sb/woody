@@ -1,6 +1,7 @@
-package happy2b.woody.core.flame.resource;
+package happy2b.woody.core.flame.core;
 
 import happy2b.woody.common.api.id.IdGenerator;
+import happy2b.woody.core.flame.resource.ResourceMethod;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -12,16 +13,21 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class ResourceMethodManager {
 
-    private static final Set<Integer> GENERATOR_INDEXES = ConcurrentHashMap.newKeySet();
+    public static ResourceMethodManager INSTANCE = new ResourceMethodManager();
 
-    public static final List<ResourceMethod> ALL_PROFILING_INCLUDE_METHODS = new ArrayList<>();
-    public static final List<ResourceMethod> SELECTED_PROFILING_INCLUDE_METHODS = new ArrayList<>();
+    private Set<Integer> GENERATOR_INDEXES = ConcurrentHashMap.newKeySet();
 
-    public static IdGenerator[] ID_GENERATORS = new IdGenerator[10];
-    public static final Set<String> TRACING_METHODS = ConcurrentHashMap.newKeySet();
+    public List<ResourceMethod> allProfilingIncludeMethods = new ArrayList<>();
+    public List<ResourceMethod> selectedProfilingIncludeMethods = new ArrayList<>();
 
-    public static void addProfilingIncludeMethod(ResourceMethod method) {
-        ALL_PROFILING_INCLUDE_METHODS.add(method);
+    public IdGenerator[] ID_GENERATORS = new IdGenerator[10];
+    public Set<String> TRACING_METHODS = ConcurrentHashMap.newKeySet();
+
+    private ResourceMethodManager() {
+    }
+
+    public void addProfilingIncludeMethod(ResourceMethod method) {
+        allProfilingIncludeMethods.add(method);
         TRACING_METHODS.add(method.getClazz().getName().replace(".", "/"));
 
         int order = method.getIdGenerator().getOrder();
@@ -34,8 +40,8 @@ public class ResourceMethodManager {
         addIdGenerator(method.getIdGenerator());
     }
 
-    public static ResourceMethod findProfilingIncludeMethod(String className, String methodName, String descriptor) {
-        for (ResourceMethod method : ALL_PROFILING_INCLUDE_METHODS) {
+    public ResourceMethod findProfilingIncludeMethod(String className, String methodName, String descriptor) {
+        for (ResourceMethod method : allProfilingIncludeMethods) {
             if (method.getClazz().getName().equals(className) && method.getMethodName().equals(methodName) && method.getSignature().equals(descriptor)) {
                 return method;
             }
@@ -43,7 +49,7 @@ public class ResourceMethodManager {
         return null;
     }
 
-    private static synchronized void refreshIdGenerator() {
+    private synchronized void refreshIdGenerator() {
         IdGenerator[] generators = new IdGenerator[ID_GENERATORS.length * 2];
         int i = 0;
         for (IdGenerator idGenerator : ID_GENERATORS) {
@@ -52,31 +58,31 @@ public class ResourceMethodManager {
         ID_GENERATORS = generators;
     }
 
-    private static synchronized void addIdGenerator(IdGenerator idGenerator) {
+    private synchronized void addIdGenerator(IdGenerator idGenerator) {
         if (GENERATOR_INDEXES.add(idGenerator.getOrder())) {
             ID_GENERATORS[GENERATOR_INDEXES.size() - 1] = idGenerator;
         }
     }
 
-    public static Map<String, String> buildResourceTypeMappings() {
+    public Map<String, String> buildResourceTypeMappings() {
         Map<String, String> mappings = new HashMap<>();
-        for (ResourceMethod method : ALL_PROFILING_INCLUDE_METHODS) {
+        for (ResourceMethod method : allProfilingIncludeMethods) {
             mappings.put(method.getResource(), method.getResourceType());
         }
         return mappings;
     }
 
-    public static Map<String, String> buildMethodPathResourceMappings() {
+    public Map<String, String> buildMethodPathResourceMappings() {
         Map<String, String> mappings = new HashMap<>();
-        for (ResourceMethod method : ALL_PROFILING_INCLUDE_METHODS) {
+        for (ResourceMethod method : allProfilingIncludeMethods) {
             mappings.put(method.getMethodPath(), method.getResource());
         }
         return mappings;
     }
 
-    public static Set<ResourceMethod> getResourceByType(String resourceType) {
+    public Set<ResourceMethod> getResourceByType(String resourceType) {
         Set<ResourceMethod> methods = new HashSet<>();
-        for (ResourceMethod includeMethod : ALL_PROFILING_INCLUDE_METHODS) {
+        for (ResourceMethod includeMethod : allProfilingIncludeMethods) {
             if (includeMethod.getResourceType().equals(resourceType)) {
                 methods.add(includeMethod);
             }
@@ -84,9 +90,9 @@ public class ResourceMethodManager {
         return methods;
     }
 
-    public static Set<ResourceMethod> getSelectedResourceByType(String resourceType) {
+    public Set<ResourceMethod> getSelectedResourceByType(String resourceType) {
         Set<ResourceMethod> methods = new HashSet<>();
-        for (ResourceMethod includeMethod : SELECTED_PROFILING_INCLUDE_METHODS) {
+        for (ResourceMethod includeMethod : selectedProfilingIncludeMethods) {
             if (includeMethod.getResourceType().equals(resourceType)) {
                 methods.add(includeMethod);
             }
@@ -94,12 +100,16 @@ public class ResourceMethodManager {
         return methods;
     }
 
-    public static void addSelectedResourceMethod(ResourceMethod resourceMethod) {
-        SELECTED_PROFILING_INCLUDE_METHODS.add(resourceMethod);
+    public void addSelectedResourceMethod(ResourceMethod resourceMethod) {
+        selectedProfilingIncludeMethods.add(resourceMethod);
     }
 
-    public static void addSelectedResourceMethod(Collection<ResourceMethod> resourceMethods) {
-        SELECTED_PROFILING_INCLUDE_METHODS.addAll(resourceMethods);
+    public void addSelectedResourceMethod(Collection<ResourceMethod> resourceMethods) {
+        selectedProfilingIncludeMethods.addAll(resourceMethods);
+    }
+
+    public void clearSelectedResource() {
+        selectedProfilingIncludeMethods.clear();
     }
 
 }

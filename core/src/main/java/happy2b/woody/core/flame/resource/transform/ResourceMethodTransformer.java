@@ -1,7 +1,7 @@
 package happy2b.woody.core.flame.resource.transform;
 
 import happy2b.woody.core.flame.resource.ResourceMethod;
-import happy2b.woody.core.flame.resource.ResourceMethodManager;
+import happy2b.woody.core.flame.core.ResourceMethodManager;
 import happy2b.woody.core.tool.AGCTPredicate;
 import happy2b.woody.common.api.id.IdGenerator;
 import happy2b.woody.common.api.id.ParametricIdGenerator;
@@ -43,7 +43,7 @@ public class ResourceMethodTransformer implements ClassFileTransformer {
             @Override
             public MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
                 MethodVisitor mv = super.visitMethod(access, name, descriptor, signature, exceptions);
-                ResourceMethod includeMethod = ResourceMethodManager.findProfilingIncludeMethod(classBeingRedefined.getName(), name, descriptor);
+                ResourceMethod includeMethod = ResourceMethodManager.INSTANCE.findProfilingIncludeMethod(classBeingRedefined.getName(), name, descriptor);
                 return includeMethod == null ? mv : new TracingMethodVisitor(Opcodes.ASM9, mv, includeMethod);
             }
         }, ClassReader.EXPAND_FRAMES);
@@ -90,7 +90,7 @@ public class ResourceMethodTransformer implements ClassFileTransformer {
 
             int order = includeMethod.getIdGenerator().getOrder();
             mv.visitLdcInsn(order);
-            IdGenerator idGenerator = ResourceMethodManager.ID_GENERATORS[order];
+            IdGenerator idGenerator = ResourceMethodManager.INSTANCE.ID_GENERATORS[order];
             if (idGenerator instanceof ParametricIdGenerator) {
                 if (includeMethod.getMethod().getParameterTypes().length == 0) {
                     throw new IllegalStateException("method " + includeMethod.getMethodName() + " has no parameter");

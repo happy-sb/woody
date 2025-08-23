@@ -5,6 +5,7 @@ import happy2b.woody.core.flame.common.constant.ProfilingResourceType;
 import happy2b.woody.core.flame.resource.ResourceMethod;
 import happy2b.woody.core.flame.resource.fetch.ResourceFetcher;
 import happy2b.woody.core.tool.jni.AsyncProfiler;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -18,7 +19,7 @@ import java.util.Map;
  */
 public class GrpcResourceFetcher implements ResourceFetcher {
 
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(GrpcResourceFetcher.class);
+    private static final org.slf4j.Logger log = LoggerFactory.getLogger(GrpcResourceFetcher.class);
 
     public static final GrpcResourceFetcher INSTANCE = new GrpcResourceFetcher();
 

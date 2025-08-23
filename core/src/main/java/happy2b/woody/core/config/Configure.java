@@ -2,6 +2,7 @@ package happy2b.woody.core.config;
 
 import happy2b.woody.common.reflection.ReflectionUtils;
 
+import java.io.File;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
@@ -14,6 +15,7 @@ public class Configure {
     private Integer javaPid;
     private String woodyCore;
     private String woodyAgent;
+    private String woodyHome;
 
     public Integer getJavaPid() {
         return javaPid;
@@ -45,6 +47,13 @@ public class Configure {
 
     public void setServerPort(Integer serverPort) {
         this.serverPort = serverPort;
+    }
+
+    public String getWoodyHome() {
+        if(woodyHome == null){
+            woodyHome = new File(woodyCore).getParentFile().getAbsolutePath();
+        }
+        return woodyHome;
     }
 
     /**

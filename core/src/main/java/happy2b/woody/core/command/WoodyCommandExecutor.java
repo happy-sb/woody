@@ -8,7 +8,15 @@ public interface WoodyCommandExecutor {
 
     boolean support(WoodyCommand command);
 
-    void execute(WoodyCommand command);
+    void executeInternal(WoodyCommand command);
+
+    default void execute(WoodyCommand command){
+        try {
+            executeInternal(command);
+        } catch (Throwable throwable) {
+            command.error(buildFailedMessage(command.getEval(), throwable));
+        }
+    }
 
     default String buildFailedMessage(String command, Throwable t) {
         return "执行命令:'" + command + "’失败,失败信息:" + t.getMessage() + ", 相信错误 信息请查看${user.home}/.woody/woody.log文件";

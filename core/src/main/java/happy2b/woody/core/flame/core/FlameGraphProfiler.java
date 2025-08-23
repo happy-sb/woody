@@ -4,7 +4,6 @@ import happy2b.woody.common.api.id.IdGenerator;
 import happy2b.woody.core.flame.common.constant.ProfilingResourceType;
 import happy2b.woody.core.flame.common.dto.ProfilingSample;
 import happy2b.woody.core.flame.resource.ResourceMethod;
-import happy2b.woody.core.flame.resource.ResourceMethodManager;
 import happy2b.woody.core.tool.ProfilingSampleProcessor;
 import happy2b.woody.core.tool.jni.AsyncProfiler;
 import org.slf4j.Logger;
@@ -33,11 +32,11 @@ public class FlameGraphProfiler {
      * @param idGenerator generate id
      */
     public static void addProfilingResource(String resource, String type, Method method, IdGenerator idGenerator) {
-        ResourceMethodManager.addProfilingIncludeMethod(new ResourceMethod(type, resource, method, idGenerator));
+        ResourceMethodManager.INSTANCE.addProfilingIncludeMethod(new ResourceMethod(type, resource, method, idGenerator));
     }
 
     public static void startProfiling(Map<String, Long> eventIntervals, ProfilingResourceType... types) throws Throwable {
-        if (ResourceMethodManager.ALL_PROFILING_INCLUDE_METHODS.isEmpty()) {
+        if (ResourceMethodManager.INSTANCE.allProfilingIncludeMethods.isEmpty()) {
             throw new IllegalStateException("No profiling include methods");
         }
         AsyncProfiler asyncProfiler = AsyncProfiler.getInstance();

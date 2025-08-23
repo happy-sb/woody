@@ -1,6 +1,8 @@
 package happy2b.woody.core.server;
 
+import happy2b.woody.common.api.WoodyCommand;
 import happy2b.woody.common.bytecode.InstrumentationUtils;
+import happy2b.woody.common.thread.AgentThreadFactory;
 import happy2b.woody.core.config.Configure;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
@@ -65,13 +67,12 @@ public class WoodyBootstrap {
             }
         });
 
-        shutdown = new Thread("as-shutdown-hooker") {
-
+        shutdown = AgentThreadFactory.newAgentThread(AgentThreadFactory.AgentThread.SHUTDOWN_HOOK, new Runnable() {
             @Override
             public void run() {
                 WoodyBootstrap.this.destroy();
             }
-        };
+        });
 
         new Thread(new Runnable() {
             @Override
@@ -159,5 +160,17 @@ public class WoodyBootstrap {
             workerGroup.shutdownGracefully();
         }
         bootstrapInstance = null;
+    }
+
+    public Channel getServerChannel() {
+        return serverChannel;
+    }
+
+    public void writeCommand(WoodyCommand command) {
+        serverChannel.writeAndFlush(WoodyServerHandler.JSON_ADAPTER.toJson(command));
+    }
+
+    public String getWoodyHome() {
+        return configure.getWoodyHome();
     }
 }

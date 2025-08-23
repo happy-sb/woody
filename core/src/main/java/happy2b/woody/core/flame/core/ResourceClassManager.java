@@ -1,6 +1,7 @@
-package happy2b.woody.core.flame.resource.transform;
+package happy2b.woody.core.flame.core;
 
 import happy2b.woody.common.bytecode.InstrumentationUtils;
+import happy2b.woody.core.flame.resource.transform.ResourceMethodTransformer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,13 +16,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class ResourceClassManager {
 
-    public static final ResourceClassManager INSTANCE = new ResourceClassManager();
-
     private static final Logger log = LoggerFactory.getLogger(ResourceClassManager.class);
 
-    private static final Set<Class> RESOURCE_CLASSES = ConcurrentHashMap.newKeySet();
+    public static ResourceClassManager INSTANCE = new ResourceClassManager();
 
-    private static AtomicBoolean transformerAdded = new AtomicBoolean(false);
+    private Set<Class> RESOURCE_CLASSES = ConcurrentHashMap.newKeySet();
+
+    private AtomicBoolean transformerAdded = new AtomicBoolean(false);
 
     private ResourceClassManager() {
     }
@@ -46,5 +47,9 @@ public class ResourceClassManager {
             }
         }
         RESOURCE_CLASSES.clear();
+    }
+
+    public static void destroy() {
+        INSTANCE = null;
     }
 }

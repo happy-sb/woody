@@ -1,8 +1,8 @@
-package happy2b.woody.core.flame.resource.fetch;
+package happy2b.woody.core.flame.core;
 
 import happy2b.woody.common.bytecode.InstrumentationUtils;
 import happy2b.woody.core.flame.resource.ResourceMethod;
-import happy2b.woody.core.flame.resource.ResourceMethodManager;
+import happy2b.woody.core.flame.resource.fetch.ResourceFetcher;
 import happy2b.woody.core.flame.resource.fetch.plugin.*;
 
 import java.util.*;
@@ -14,14 +14,12 @@ import java.util.*;
  */
 public class ResourceFetcherManager {
 
-    private static List<String> allAvailableResourceTypes;
-    private static final Map<String, ResourceFetcher> allResourceFetchers = new HashMap<>();
+    public static ResourceFetcherManager INSTANCE = new ResourceFetcherManager();
 
-    private static void addResourceFetcher(ResourceFetcher fetcher) {
-        allResourceFetchers.put(fetcher.resourceType().getValue(), fetcher);
-    }
+    private List<String> allAvailableResourceTypes;
+    private Map<String, ResourceFetcher> allResourceFetchers = new HashMap<>();
 
-    static {
+    private ResourceFetcherManager() {
         addResourceFetcher(SpringWebResourceFetcher.INSTANCE);
         addResourceFetcher(GrpcResourceFetcher.INSTANCE);
         addResourceFetcher(DubboResourceFetcher.INSTANCE);
@@ -29,13 +27,21 @@ public class ResourceFetcherManager {
         addResourceFetcher(KafkaResourceFetcher.INSTANCE);
     }
 
-    public static void selectResource(String... resourceTypes) {
+    private void addResourceFetcher(ResourceFetcher fetcher) {
+        allResourceFetchers.put(fetcher.resourceType().getValue(), fetcher);
+    }
+
+    public void clearSelectedResources() {
+        ResourceMethodManager.INSTANCE.clearSelectedResource();
+    }
+
+    public void selectResources(String... resourceTypes) {
         for (String resourceType : resourceTypes) {
             ResourceFetcher fetcher = allResourceFetchers.get(resourceType);
             if (fetcher == null) {
                 throw new IllegalArgumentException("resourceType is not valid: " + resourceType);
             }
-            Set<ResourceMethod> methods = ResourceMethodManager.getResourceByType(resourceType);
+            Set<ResourceMethod> methods = ResourceMethodManager.INSTANCE.getResourceByType(resourceType);
             if (methods == null) {
                 List<Class> classList = InstrumentationUtils.findClass(fetcher.getResourceClassName());
                 if (!classList.isEmpty()) {
@@ -43,27 +49,27 @@ public class ResourceFetcherManager {
                         fetcher.fetchResources(clazz);
                     }
                 }
-                methods = ResourceMethodManager.getResourceByType(resourceType);
+                methods = ResourceMethodManager.INSTANCE.getResourceByType(resourceType);
             }
-            ResourceMethodManager.addSelectedResourceMethod(methods);
+            ResourceMethodManager.INSTANCE.addSelectedResourceMethod(methods);
         }
     }
 
-    public static void selectResource(String resourceType, String... resources) {
+    public void selectResources(String resourceType, List<Integer> orders) {
         if (!allResourceFetchers.containsKey(resourceType)) {
             throw new IllegalArgumentException("resourceType is not valid: " + resourceType);
         }
-        Set<ResourceMethod> methods = ResourceMethodManager.getResourceByType(resourceType);
+        Set<ResourceMethod> methods = ResourceMethodManager.INSTANCE.getResourceByType(resourceType);
         for (ResourceMethod method : methods) {
-            for (String resource : resources) {
-                if (method.getResource().equals(resource)) {
-                    ResourceMethodManager.addSelectedResourceMethod(method);
+            for (Integer order : orders) {
+                if (method.getOrder() == order) {
+                    ResourceMethodManager.INSTANCE.addSelectedResourceMethod(method);
                 }
             }
         }
     }
 
-    public static List<String> listAllAvailableResourceTypes() {
+    public List<String> listAllAvailableResourceTypes() {
         if (allAvailableResourceTypes != null) {
             return allAvailableResourceTypes;
         }
@@ -88,10 +94,10 @@ public class ResourceFetcherManager {
     }
 
     public static Set<ResourceMethod> listSelectedResources(String resourceType) {
-        return ResourceMethodManager.getSelectedResourceByType(resourceType);
+        return ResourceMethodManager.INSTANCE.getSelectedResourceByType(resourceType);
     }
 
-    public static Map<String, Set<ResourceMethod>> listAllSelectedResources() {
+    public Map<String, Set<ResourceMethod>> listAllSelectedResources() {
         if (allAvailableResourceTypes == null) {
             listAllAvailableResourceTypes();
         }
@@ -105,9 +111,9 @@ public class ResourceFetcherManager {
         return result;
     }
 
-    public static Set<ResourceMethod> listResources(String resourceType) {
+    public Set<ResourceMethod> listResources(String resourceType) {
         ResourceFetcher fetcher = allResourceFetchers.get(resourceType);
-        Set<ResourceMethod> methods = ResourceMethodManager.getResourceByType(resourceType);
+        Set<ResourceMethod> methods = ResourceMethodManager.INSTANCE.getResourceByType(resourceType);
         if (methods.isEmpty()) {
             List<Class> classList = InstrumentationUtils.findClass(fetcher.getResourceClassName());
             if (!classList.isEmpty()) {
@@ -115,12 +121,12 @@ public class ResourceFetcherManager {
                     fetcher.fetchResources(clazz);
                 }
             }
-            methods = ResourceMethodManager.getResourceByType(resourceType);
+            methods = ResourceMethodManager.INSTANCE.getResourceByType(resourceType);
         }
         return methods;
     }
 
-    public static Map<String, Set<ResourceMethod>> listAllResources() {
+    public Map<String, Set<ResourceMethod>> listAllResources() {
         if (allAvailableResourceTypes == null) {
             listAllAvailableResourceTypes();
         }
@@ -132,6 +138,10 @@ public class ResourceFetcherManager {
             }
         }
         return result;
+    }
+
+    public static void destroy() {
+        INSTANCE = null;
     }
 
 

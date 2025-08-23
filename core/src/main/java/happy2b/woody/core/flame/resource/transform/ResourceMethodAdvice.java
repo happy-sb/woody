@@ -2,7 +2,7 @@ package happy2b.woody.core.flame.resource.transform;
 
 import happy2b.woody.common.reflection.ReflectionUtils;
 import happy2b.woody.core.flame.core.TraceManager;
-import happy2b.woody.core.flame.resource.ResourceMethodManager;
+import happy2b.woody.core.flame.core.ResourceMethodManager;
 import happy2b.woody.core.flame.common.dto.ProfilingSpan;
 import happy2b.woody.core.flame.common.dto.ProfilingTrace;
 import happy2b.woody.common.api.id.ParametricIdGenerator;
@@ -35,20 +35,20 @@ public class ResourceMethodAdvice {
     }
 
     public static ProfilingTrace startTrace(String resourceType, String resource, String methodPath, int generatorIndex) {
-        return TraceManager.startProfilingTrace(Thread.currentThread().getId(), resource, resourceType, methodPath, ResourceMethodManager.ID_GENERATORS[generatorIndex].generateTraceId());
+        return TraceManager.startProfilingTrace(Thread.currentThread().getId(), resource, resourceType, methodPath, ResourceMethodManager.INSTANCE.ID_GENERATORS[generatorIndex].generateTraceId());
     }
 
     public static ProfilingTrace startTrace(String resourceType, String resource, String methodPath, int generatorIndex, Object param) {
-        ParametricIdGenerator idGenerator = (ParametricIdGenerator) ResourceMethodManager.ID_GENERATORS[generatorIndex];
+        ParametricIdGenerator idGenerator = (ParametricIdGenerator) ResourceMethodManager.INSTANCE.ID_GENERATORS[generatorIndex];
         return TraceManager.startProfilingTrace(Thread.currentThread().getId(), resource, resourceType, methodPath, idGenerator.generateTraceId(param));
     }
 
     public static ProfilingSpan startSpan(String operationName, String methodPath, int generatorIndex) {
-        return TraceManager.startProfilingSpan(Thread.currentThread().getId(), ResourceMethodManager.ID_GENERATORS[generatorIndex].generateSpanId(), System.nanoTime(), operationName);
+        return TraceManager.startProfilingSpan(Thread.currentThread().getId(), ResourceMethodManager.INSTANCE.ID_GENERATORS[generatorIndex].generateSpanId(), System.nanoTime(), operationName);
     }
 
     public static ProfilingSpan startSpan(String operationName, String methodPath, int generatorIndex, Object param) {
-        ParametricIdGenerator idGenerator = (ParametricIdGenerator) ResourceMethodManager.ID_GENERATORS[generatorIndex];
+        ParametricIdGenerator idGenerator = (ParametricIdGenerator) ResourceMethodManager.INSTANCE.ID_GENERATORS[generatorIndex];
         return TraceManager.startProfilingSpan(Thread.currentThread().getId(), idGenerator.generateSpanId(param), System.nanoTime(), operationName);
     }
 

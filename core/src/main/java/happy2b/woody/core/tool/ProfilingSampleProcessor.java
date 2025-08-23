@@ -1,7 +1,7 @@
 package happy2b.woody.core.tool;
 
 import happy2b.woody.core.flame.common.dto.*;
-import happy2b.woody.core.flame.resource.ResourceMethodManager;
+import happy2b.woody.core.flame.core.ResourceMethodManager;
 
 import java.util.*;
 
@@ -23,8 +23,8 @@ public class ProfilingSampleProcessor {
     public static List<ProfilingSample> parseProfilingSamples(String[] lines) {
         ProfilingSample ps = null;
         List<ProfilingSample> result = new ArrayList<>(1024);
-        Map<String, String> resourceTypeMappings = ResourceMethodManager.buildResourceTypeMappings();
-        Map<String, String> methodPathResourceMappings = ResourceMethodManager.buildMethodPathResourceMappings();
+        Map<String, String> resourceTypeMappings = ResourceMethodManager.INSTANCE.buildResourceTypeMappings();
+        Map<String, String> methodPathResourceMappings = ResourceMethodManager.INSTANCE.buildMethodPathResourceMappings();
 
         for (int i = 3; i < lines.length; i++) {
             String line = lines[i];

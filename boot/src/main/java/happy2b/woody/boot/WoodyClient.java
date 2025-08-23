@@ -1,7 +1,6 @@
 package happy2b.woody.boot;
 
 import com.squareup.moshi.JsonAdapter;
-import com.squareup.moshi.JsonReader;
 import com.squareup.moshi.Moshi;
 import happy2b.woody.common.api.WoodyCommand;
 import io.netty.bootstrap.Bootstrap;
@@ -92,7 +91,9 @@ public class WoodyClient {
                     WoodyCommand command = JSON_ADAPTER.fromJson((String) msg);
                     if (command.getTime() > abortTime) {
                         terminalWriter.println(command.getResult());
-                        latch.countDown();
+                        if (!command.isBlocked()) {
+                            latch.countDown();
+                        }
                     }
                 } catch (Exception e) {
                     e.printStackTrace();

@@ -3,7 +3,7 @@ package happy2b.woody.core.server;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
 import happy2b.woody.common.api.WoodyCommand;
-import happy2b.woody.core.command.CommandExecutor;
+import happy2b.woody.core.command.CommandExecutors;
 import happy2b.woody.core.command.StopCommandExecutor;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -15,12 +15,12 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
  */
 public class WoodyServerHandler extends ChannelInboundHandlerAdapter {
 
-    private static final JsonAdapter<WoodyCommand> JSON_ADAPTER = new Moshi.Builder().build().adapter(WoodyCommand.class);
+    public static final JsonAdapter<WoodyCommand> JSON_ADAPTER = new Moshi.Builder().build().adapter(WoodyCommand.class);
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         String eval = msg.toString().trim();
-        WoodyCommand command = CommandExecutor.execute(eval);
+        WoodyCommand command = CommandExecutors.execute(eval);
         if (StopCommandExecutor.COMMAND_NAME.equals(eval)) {
             return;
         }

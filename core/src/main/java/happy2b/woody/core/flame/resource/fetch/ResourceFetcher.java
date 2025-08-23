@@ -2,8 +2,8 @@ package happy2b.woody.core.flame.resource.fetch;
 
 import happy2b.woody.core.flame.common.constant.ProfilingResourceType;
 import happy2b.woody.core.flame.resource.ResourceMethod;
-import happy2b.woody.core.flame.resource.ResourceMethodManager;
-import happy2b.woody.core.flame.resource.transform.ResourceClassManager;
+import happy2b.woody.core.flame.core.ResourceMethodManager;
+import happy2b.woody.core.flame.core.ResourceClassManager;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -33,7 +33,7 @@ public interface ResourceFetcher {
         if (clazz.getName().startsWith("org.springframework")) {
             return;
         }
-        ResourceMethodManager.addProfilingIncludeMethod(method);
+        ResourceMethodManager.INSTANCE.addProfilingIncludeMethod(method);
         String resourceType = method.getResourceType();
         AtomicInteger atomicInteger = resourceCounts.get(resourceType);
         if (atomicInteger == null) {
