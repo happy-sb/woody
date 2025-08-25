@@ -171,6 +171,6 @@ public class WoodyBootstrap {
     }
 
     public String getWoodyHome() {
-        return configure.getWoodyHome();
+        return configure.getWoodyHomeDir();
     }
 }

@@ -4,10 +4,16 @@ import happy2b.woody.common.utils.AnsiLog;
 import happy2b.woody.common.utils.PortUtils;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
 import java.security.CodeSource;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.InputMismatchException;
 import java.util.List;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 
 /**
  * @author jiangjibo
@@ -34,14 +40,12 @@ public class Bootstrap {
         File woodyHomeDir = null;
         CodeSource codeSource = Bootstrap.class.getProtectionDomain().getCodeSource();
         if (codeSource != null) {
-            try {
-                File bootJarPath = new File(codeSource.getLocation().toURI().getSchemeSpecificPart());
-                verifyWoodyHome(bootJarPath.getParent());
-                woodyHomeDir = bootJarPath.getParentFile();
-            } catch (Throwable e) {
-                throw e;
+            File bootJarPath = new File(codeSource.getLocation().toURI().getSchemeSpecificPart());
+            List<String> modules = extractModules(bootJarPath);
+            woodyHomeDir = bootJarPath.getParentFile();
+            for (String module : modules) {
+                extractJarFile(module, module.substring(module.indexOf("/") + 1, module.lastIndexOf("-")) + ".jar", woodyHomeDir);
             }
-
         }
 
         int availablePort = PortUtils.getAvailablePort(SERVER_BINDING_PORT);
@@ -72,19 +76,32 @@ public class Bootstrap {
         new WoodyClient("127.0.0.1", availablePort, pid).boot();
     }
 
-    private static void verifyWoodyHome(String arthasHome) {
-        File home = new File(arthasHome);
-        if (home.isDirectory()) {
-            String[] fileList = {"woody-core.jar", "woody-agent.jar"};
-
-            for (String fileName : fileList) {
-                if (!new File(home, fileName).exists()) {
-                    throw new IllegalArgumentException(fileName + " do not exist, arthas home: " + home.getAbsolutePath());
-                }
+    private static List<String> extractModules(File jarFile) throws IOException {
+        List<String> modules = new ArrayList<>();
+        JarFile jar = new JarFile(jarFile);
+        Enumeration<JarEntry> entries = jar.entries();
+        while (entries.hasMoreElements()) {
+            JarEntry entry = entries.nextElement();
+            String entryName = entry.getName();
+            if (entryName.startsWith("modules/woody-") && !entry.isDirectory() && entryName.endsWith("jar")) {
+                modules.add(entryName);
             }
-            return;
         }
+        return modules;
+    }
 
-        throw new IllegalArgumentException("illegal arthas home: " + home.getAbsolutePath());
+    private static File extractJarFile(String modulePath, String moduleName, File woodyHomeDir) throws IOException {
+        File coreJar = new File(woodyHomeDir, moduleName);
+        if (coreJar.exists()) {
+            coreJar.delete();
+        }
+        String innerJarPath = "/" + modulePath;
+        InputStream in = Bootstrap.class.getResourceAsStream(innerJarPath);
+        if (in == null) {
+            throw new IllegalStateException("can not find jar: " + innerJarPath);
+        }
+        Files.copy(in, coreJar.toPath());
+        coreJar.deleteOnExit();
+        return coreJar;
     }
 }

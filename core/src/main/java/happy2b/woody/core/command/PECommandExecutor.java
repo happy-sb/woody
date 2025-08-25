@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 /**
  * @author jiangjibo
  * @version 1.0
- * @description: profiling events[interval] -c(clear) -s(selected) -l(list)
+ * @description: profiling events[interval] -c(clear) -s(selected) -l(list) --cpu cpuInterval
  * @since 2025/8/22
  */
 public class PECommandExecutor implements WoodyCommandExecutor {
@@ -76,7 +76,7 @@ public class PECommandExecutor implements WoodyCommandExecutor {
                 }
                 command.result(sb.toString());
                 return;
-            } else if (segment.equals("-cpu")) {
+            } else if (segment.equals("--cpu")) {
                 if (i == segments.length - 1) {
                     cpuInterval = DEFAULT_CPU_INTERVAL;
                 } else {
@@ -88,7 +88,7 @@ public class PECommandExecutor implements WoodyCommandExecutor {
                         i++;
                     }
                 }
-            } else if (segment.equals("-wall")) {
+            } else if (segment.equals("--wall")) {
                 if (i == segments.length - 1) {
                     wallInterval = DEFAULT_WALL_INTERVAL;
                 } else {
@@ -100,7 +100,7 @@ public class PECommandExecutor implements WoodyCommandExecutor {
                         i++;
                     }
                 }
-            } else if (segment.equals("-lock")) {
+            } else if (segment.equals("--lock")) {
                 if (i == segments.length - 1) {
                     lockInterval = DEFAULT_LOCK_INTERVAL;
                 } else {
@@ -112,7 +112,7 @@ public class PECommandExecutor implements WoodyCommandExecutor {
                         i++;
                     }
                 }
-            } else if (segment.equals("-alloc")) {
+            } else if (segment.equals("--alloc")) {
                 if (i == segments.length - 1) {
                     allocInterval = DEFAULT_ALLOC_INTERVAL;
                 } else {

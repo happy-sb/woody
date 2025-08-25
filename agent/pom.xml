@@ -4,7 +4,7 @@
     <parent>
         <groupId>happy2b</groupId>
         <artifactId>woody</artifactId>
-        <version>1.0.0-SNAPSHOT</version>
+        <version>1.0.0</version>
     </parent>
 
     <artifactId>woody-agent</artifactId>
@@ -35,7 +35,7 @@
                             <Can-Retransform-Classes>true</Can-Retransform-Classes>
                         </manifestEntries>
                     </archive>
-                    <finalName>woody-agent</finalName>
+                    <finalName>woody-agent-${project.version}</finalName>
                     <appendAssemblyId>false</appendAssemblyId>
                 </configuration>
                 <executions>

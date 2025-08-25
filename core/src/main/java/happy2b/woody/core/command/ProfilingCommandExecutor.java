@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 /**
  * @author jiangjibo
  * @version 1.0 2025/8/23 10:05 AM
- * @description: profiling start [-d ];  profiling stop
+ * @description: profiling start [--d ];  profiling stop
  * @since 2025/8/23
  */
 public class ProfilingCommandExecutor implements WoodyCommandExecutor {
@@ -56,7 +56,7 @@ public class ProfilingCommandExecutor implements WoodyCommandExecutor {
                 operation = Operation.START;
             } else if (segment.equals("stop")) {
                 operation = Operation.STOP;
-            } else if (segment.equals("-d")) {
+            } else if (segment.equals("--d")) {
                 if (operation != Operation.START) {
                     command.error("invalid command segment: " + segment);
                     return;

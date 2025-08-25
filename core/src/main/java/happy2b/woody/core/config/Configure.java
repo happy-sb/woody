@@ -15,7 +15,7 @@ public class Configure {
     private Integer javaPid;
     private String woodyCore;
     private String woodyAgent;
-    private String woodyHome;
+    private String woodyHomeDir;
 
     public Integer getJavaPid() {
         return javaPid;
@@ -49,11 +49,13 @@ public class Configure {
         this.serverPort = serverPort;
     }
 
-    public String getWoodyHome() {
-        if(woodyHome == null){
-            woodyHome = new File(woodyCore).getParentFile().getAbsolutePath();
-        }
-        return woodyHome;
+
+    public void setWoodyHomeDir(String woodyHomeDir) {
+        this.woodyHomeDir = woodyHomeDir;
+    }
+
+    public String getWoodyHomeDir() {
+        return woodyHomeDir;
     }
 
     /**

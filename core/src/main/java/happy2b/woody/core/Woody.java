@@ -76,7 +76,7 @@ public class Woody {
             configure.setWoodyAgent(encodeArg(woodyAgentPath));
             configure.setWoodyCore(encodeArg(configure.getWoodyCore()));
             try {
-                virtualMachine.loadAgent(woodyAgentPath, configure.getWoodyCore() + ";" + configure.toString());
+                virtualMachine.loadAgent(woodyAgentPath, configure.getWoodyCore() + ";" + configure);
             } catch (IOException e) {
                 if (e.getMessage() != null && e.getMessage().contains("Non-numeric value found")) {
                     AnsiLog.warn(e);

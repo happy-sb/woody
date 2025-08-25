@@ -40,7 +40,7 @@ public class SSCommandExecutor implements WoodyCommandExecutor {
             String segment = segments[i].trim();
             if (segment.equals(commandName())) {
                 continue;
-            } else if (segment.equals("-t")) {
+            } else if (segment.equals("--t")) {
                 type = segments[i + 1];
                 if (ProfilingResourceType.ofType(type) == null) {
                     command.error("invalid resource type: " + type);

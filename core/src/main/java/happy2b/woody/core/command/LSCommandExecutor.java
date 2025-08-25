@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 /**
  * @author jiangjibo
  * @version 1.0
- * @description: list resource -s(selected) -t(type)
+ * @description: list resource -t(type) -s(selected) --t type
  * @since 2025/8/22
  */
 public class LSCommandExecutor implements WoodyCommandExecutor {
@@ -39,9 +39,18 @@ public class LSCommandExecutor implements WoodyCommandExecutor {
             String segment = segments[i].trim();
             if (segment.equals(commandName())) {
                 continue;
+            } else if (segment.equals("-t")) {
+                List<String> types = ResourceFetcherManager.INSTANCE.listAllAvailableResourceTypes();
+                String collect = types.stream().collect(Collectors.joining(","));
+                command.result("[" + collect + "]");
+                if (i < segments.length - 1) {
+                    command.error("invalid command: list resource types!");
+                    return;
+                }
+                return;
             } else if (segment.equals("-s")) {
                 selected = true;
-            } else if (segment.equals("-t")) {
+            } else if (segment.equals("--t")) {
                 type = segments[i + 1];
                 if (ProfilingResourceType.ofType(type) == null) {
                     command.error("invalid resource type: " + type);

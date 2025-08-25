@@ -16,7 +16,6 @@ public abstract class CommandExecutors {
 
     static {
         WOODY_COMMANDS.add(new StopCommandExecutor());
-        WOODY_COMMANDS.add(new LSTCommandExecutor());
         WOODY_COMMANDS.add(new LSCommandExecutor());
         WOODY_COMMANDS.add(new SSCommandExecutor());
         WOODY_COMMANDS.add(new PECommandExecutor());

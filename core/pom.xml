@@ -4,7 +4,7 @@
     <parent>
         <groupId>happy2b</groupId>
         <artifactId>woody</artifactId>
-        <version>1.0.0-SNAPSHOT</version>
+        <version>1.0.0</version>
     </parent>
 
     <artifactId>woody-core</artifactId>
@@ -91,7 +91,7 @@
                             <Main-Class>happy2b.woody.core.Woody</Main-Class>
                         </manifestEntries>
                     </archive>
-                    <finalName>woody-core</finalName>
+                    <finalName>woody-core-${project.version}</finalName>
                     <appendAssemblyId>false</appendAssemblyId>
                 </configuration>
                 <executions>
@@ -105,5 +105,6 @@
                 </executions>
             </plugin>
         </plugins>
+
     </build>
 </project>
