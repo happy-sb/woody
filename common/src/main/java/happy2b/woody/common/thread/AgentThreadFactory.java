@@ -1,6 +1,6 @@
 package happy2b.woody.common.thread;
 
-import org.slf4j.LoggerFactory;
+import happy2b.woody.common.utils.AnsiLog;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -54,8 +54,7 @@ public final class AgentThreadFactory implements ThreadFactory {
                 new Thread.UncaughtExceptionHandler() {
                     @Override
                     public void uncaughtException(final Thread thread, final Throwable e) {
-                        LoggerFactory.getLogger(runnable.getClass())
-                                .error("Uncaught exception in {}", agentThread.threadName, e);
+                        AnsiLog.error("Uncaught exception in {}", agentThread.threadName, e);
                     }
                 });
         return thread;

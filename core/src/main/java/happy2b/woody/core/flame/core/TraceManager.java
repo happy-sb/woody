@@ -1,17 +1,18 @@
 package happy2b.woody.core.flame.core;
 
+import happy2b.woody.common.utils.AnsiLog;
 import happy2b.woody.core.flame.common.constant.ProfilingResourceType;
 import happy2b.woody.core.flame.common.dto.ProfilingSpan;
 import happy2b.woody.core.flame.common.dto.ProfilingTrace;
 import happy2b.woody.core.flame.common.dto.ProfilingTraces;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.woody.SpyAPI;
 
 /**
  * @author jiangjibo
@@ -20,64 +21,68 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class TraceManager {
 
-    private static final Logger log = LoggerFactory.getLogger(TraceManager.class);
+    static volatile TracingState profiling_status = TracingState.OFF_TRACING;
 
-    public static Map<Long, ProfilingTraces> profilingTraces = new ConcurrentHashMap<>();
+    public static final Map<Long, ProfilingTraces> PROFILING_TRACES = new ConcurrentHashMap<>();
 
-    static boolean tracingEnabled = false;
-
-    static final Map<String, String> RE_TYPE_THREAD_GROUPS = new ConcurrentHashMap<>();
-    static final Map<String, Integer> THREAD_GROUP_RS_STACK_FRAME_HEIGHT_MAP = new ConcurrentHashMap<>();
+    private static final Map<String, String> RESOURCE_TYPE_THREAD_GROUPS = new ConcurrentHashMap<>();
+    private static final Map<String, Integer> THREAD_GROUP_RESOURCE_STACK_FRAME_HEIGHT_MAP = new ConcurrentHashMap<>();
 
     private static final ThreadMXBean THREAD_MX_BEAN = ManagementFactory.getThreadMXBean();
 
+    public static void prepareTracing() {
+        profiling_status = TracingState.PREPARING;
+    }
 
     public static void startTracing() {
-        tracingEnabled = true;
+        profiling_status = TracingState.ON_TRACING;
     }
 
     public static void stopTracing() {
-        tracingEnabled = false;
+        profiling_status = TracingState.OFF_TRACING;
     }
 
-    public static ProfilingTrace startProfilingTrace(Long tid, String resource, String type, String methodPath, Object traceId) {
-        if (tracingEnabled) {
+    public static SpyAPI.ITrace startProfilingTrace(Long tid, String resource, String type, String methodPath, Object traceId) {
+        if (profiling_status == TracingState.ON_TRACING) {
             ProfilingTrace profilingTrace = new ProfilingTrace(resource, type, methodPath, traceId);
-            profilingTraces.computeIfAbsent(tid, thread1 -> new ProfilingTraces()).startProfilingTrace(profilingTrace);
+            PROFILING_TRACES.computeIfAbsent(tid, thread1 -> new ProfilingTraces()).startProfilingTrace(profilingTrace);
             return profilingTrace;
         }
-        if (!RE_TYPE_THREAD_GROUPS.containsKey(type)) {
+        if (profiling_status == TracingState.PREPARING && !RESOURCE_TYPE_THREAD_GROUPS.containsKey(type)) {
             processThreadGroupName(type, tid, methodPath);
         }
-        return ProfilingTrace.NO_OP;
+        return SpyAPI.NO_OP_TRACE;
     }
 
     public static ProfilingSpan startProfilingSpan(Long tid, Object spanId, long time, String operationName) {
-        if (!profilingTraces.containsKey(tid)) {
+        if (!PROFILING_TRACES.containsKey(tid)) {
             return null;
         }
-        return profilingTraces.get(tid).startProfilingSpan(spanId, time, operationName);
+        return PROFILING_TRACES.get(tid).startProfilingSpan(spanId, time, operationName);
     }
 
     static Map<Long, Integer> collectResourceThreadIdAndStackFrameHeight(ProfilingResourceType... types) throws InterruptedException {
         int i = 0;
-        while (RE_TYPE_THREAD_GROUPS.size() < types.length) {
+        while (RESOURCE_TYPE_THREAD_GROUPS.size() < types.length) {
             if (i++ > 30) {
                 break;
             }
             Thread.sleep(1 * 1000);
         }
-        if (RE_TYPE_THREAD_GROUPS.size() < types.length) {
+        if (RESOURCE_TYPE_THREAD_GROUPS.isEmpty()) {
+            throw new IllegalStateException("failed to find resource threads:" + types);
+        }
+        if (RESOURCE_TYPE_THREAD_GROUPS.size() < types.length) {
             for (ProfilingResourceType type : types) {
-                if (!RE_TYPE_THREAD_GROUPS.containsKey(type.getValue())) {
-                    log.error("Failed to find resource type '{}' threads!", type.getValue());
+                if (!RESOURCE_TYPE_THREAD_GROUPS.containsKey(type.getValue())) {
+                    AnsiLog.error("Failed to find resource type '{}' threads!", type.getValue());
                 }
             }
         }
         Map<Long, Integer> tidHeightMap = new HashMap<>(128);
         for (ThreadInfo threadInfo : THREAD_MX_BEAN.getThreadInfo(THREAD_MX_BEAN.getAllThreadIds())) {
             String threadGroupName = extractThreadGroupName(threadInfo.getThreadName());
-            Integer height = THREAD_GROUP_RS_STACK_FRAME_HEIGHT_MAP.get(threadGroupName);
+            Integer height = THREAD_GROUP_RESOURCE_STACK_FRAME_HEIGHT_MAP.get(threadGroupName);
             if (height != null) {
                 tidHeightMap.put(threadInfo.getThreadId(), height);
             }
@@ -89,7 +94,7 @@ public class TraceManager {
         ThreadInfo threadInfo = THREAD_MX_BEAN.getThreadInfo(tid, Integer.MAX_VALUE);
         String threadGroupName = extractThreadGroupName(threadInfo.getThreadName());
 
-        RE_TYPE_THREAD_GROUPS.put(type, threadGroupName);
+        RESOURCE_TYPE_THREAD_GROUPS.put(type, threadGroupName);
 
         StackTraceElement[] stackTrace = threadInfo.getStackTrace();
         for (int i = 0; i < stackTrace.length; i++) {
@@ -97,7 +102,7 @@ public class TraceManager {
             String className = element.getClassName();
             String methodName = element.getMethodName();
             if (methodPath.startsWith(className) && methodPath.endsWith(methodName)) {
-                THREAD_GROUP_RS_STACK_FRAME_HEIGHT_MAP.put(threadGroupName, stackTrace.length - i);
+                THREAD_GROUP_RESOURCE_STACK_FRAME_HEIGHT_MAP.put(threadGroupName, stackTrace.length - i);
                 break;
             }
         }
@@ -121,6 +126,16 @@ public class TraceManager {
             return threadName;
         }
         return threadName.substring(0, end).trim();
+    }
+
+    public static void destroy() {
+        PROFILING_TRACES.clear();
+        RESOURCE_TYPE_THREAD_GROUPS.clear();
+        THREAD_GROUP_RESOURCE_STACK_FRAME_HEIGHT_MAP.clear();
+    }
+
+    private enum TracingState {
+        PREPARING, ON_TRACING, OFF_TRACING
     }
 
 }

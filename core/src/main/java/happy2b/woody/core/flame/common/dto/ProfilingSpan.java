@@ -1,6 +1,10 @@
 package happy2b.woody.core.flame.common.dto;
 
-public class ProfilingSpan {
+import happy2b.woody.common.api.NanoTimer;
+
+import java.woody.SpyAPI;
+
+public class ProfilingSpan implements SpyAPI.ISpan {
   private Object traceId;
   private Object spanId;
   private long startTime;
@@ -36,10 +40,6 @@ public class ProfilingSpan {
     return endTime;
   }
 
-  public void finish(long endTime) {
-    this.endTime = endTime;
-  }
-
   public String getOperation() {
     return operation;
   }
@@ -62,5 +62,10 @@ public class ProfilingSpan {
 
   public String getRootMethod() {
     return rootMethod;
+  }
+
+  @Override
+  public void finish() {
+    this.endTime = NanoTimer.INSTANCE.getNanoTime();
   }
 }

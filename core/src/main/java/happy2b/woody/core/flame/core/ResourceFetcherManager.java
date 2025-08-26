@@ -31,8 +31,12 @@ public class ResourceFetcherManager {
         allResourceFetchers.put(fetcher.resourceType().getValue(), fetcher);
     }
 
-    public void clearSelectedResources() {
-        ResourceMethodManager.INSTANCE.clearSelectedResource();
+    public void deleteSelectedResources(String type) {
+        ResourceMethodManager.INSTANCE.deleteSelectedResources(type);
+    }
+
+    public Set<String> listSelectedResourceTypes() {
+        return ResourceMethodManager.INSTANCE.getSelectedResourceTypes();
     }
 
     public void selectResources(String... resourceTypes) {
@@ -93,7 +97,7 @@ public class ResourceFetcherManager {
         return types;
     }
 
-    public static Set<ResourceMethod> listSelectedResources(String resourceType) {
+    public Set<ResourceMethod> listSelectedResources(String resourceType) {
         return ResourceMethodManager.INSTANCE.getSelectedResourceByType(resourceType);
     }
 
@@ -141,7 +145,11 @@ public class ResourceFetcherManager {
     }
 
     public static void destroy() {
-        INSTANCE = null;
+        if (INSTANCE != null) {
+            INSTANCE.allResourceFetchers = null;
+            INSTANCE.allAvailableResourceTypes = null;
+            INSTANCE = null;
+        }
     }
 
 

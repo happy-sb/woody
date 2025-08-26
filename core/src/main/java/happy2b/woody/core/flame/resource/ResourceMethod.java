@@ -5,6 +5,7 @@ import happy2b.woody.common.utils.MethodUtil;
 import happy2b.woody.common.api.id.IdGenerator;
 
 import java.lang.reflect.Method;
+import java.util.Objects;
 
 public class ResourceMethod {
     private int order;
@@ -80,5 +81,17 @@ public class ResourceMethod {
 
     public String getMethodPath() {
         return methodPath;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        ResourceMethod that = (ResourceMethod) o;
+        return order == that.order && Objects.equals(clazz, that.clazz) && Objects.equals(methodName, that.methodName) && Objects.equals(descriptor, that.descriptor) && Objects.equals(method, that.method) && Objects.equals(methodPath, that.methodPath) && Objects.equals(resourceType, that.resourceType) && Objects.equals(resource, that.resource);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(order, clazz, methodName, descriptor, method, methodPath, resourceType, resource);
     }
 }

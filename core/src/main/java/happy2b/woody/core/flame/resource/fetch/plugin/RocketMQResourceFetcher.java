@@ -1,6 +1,7 @@
 package happy2b.woody.core.flame.resource.fetch.plugin;
 
 import happy2b.woody.common.reflection.ReflectionUtils;
+import happy2b.woody.common.utils.AnsiLog;
 import happy2b.woody.core.flame.common.constant.ProfilingResourceType;
 import happy2b.woody.core.flame.resource.ResourceMethod;
 import happy2b.woody.core.flame.resource.fetch.ResourceFetcher;
@@ -14,8 +15,6 @@ import java.util.Map;
  * @since 2025/8/21
  */
 public class RocketMQResourceFetcher implements ResourceFetcher {
-
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(RocketMQResourceFetcher.class);
 
     public static final RocketMQResourceFetcher INSTANCE = new RocketMQResourceFetcher();
 
@@ -45,7 +44,7 @@ public class RocketMQResourceFetcher implements ResourceFetcher {
         try {
             Object[] instances = AsyncProfiler.getInstance().getInstances(clazz, 100);
             if (instances == null || instances.length == 0) {
-                log.error("Woody: Failed to fetch rocketmq '{}' instance!", clazz.getName());
+                AnsiLog.error("Woody: Failed to fetch rocketmq '{}' instance!", clazz.getName());
                 return;
             }
             for (Object instance : instances) {
@@ -53,7 +52,7 @@ public class RocketMQResourceFetcher implements ResourceFetcher {
                 fetchRocketMQResources_1(instance, messageListener);
             }
         } catch (Throwable e) {
-            log.error("Woody: Fetch rocketmq resource occur exception!", e);
+            AnsiLog.error("Woody: Fetch rocketmq resource occur exception!", e);
         }
     }
 
@@ -67,19 +66,19 @@ public class RocketMQResourceFetcher implements ResourceFetcher {
         try {
             Object[] instances = AsyncProfiler.getInstance().getInstances(clazz, 100);
             if (instances == null || instances.length == 0) {
-                log.error("Woody: Failed to fetch rocketmq '{}' instance!", clazz.getName());
+                AnsiLog.error("Woody: Failed to fetch rocketmq '{}' instance!", clazz.getName());
                 return;
             }
             for (Object instance : instances) {
                 Object messageListener = ReflectionUtils.get(instance, "messageListener");
                 if (messageListener == null) {
-                    log.error("Woody: Failed to fetch rocketmq '{}' messageListener!", clazz.getName());
+                    AnsiLog.error("Woody: Failed to fetch rocketmq '{}' messageListener!", clazz.getName());
                     return;
                 }
                 fetchRocketMQResources_2(instance, messageListener);
             }
         } catch (Throwable e) {
-            log.error("Woody: Fetch rocketmq resource occur exception!", e);
+            AnsiLog.error("Woody: Fetch rocketmq resource occur exception!", e);
         }
     }
 

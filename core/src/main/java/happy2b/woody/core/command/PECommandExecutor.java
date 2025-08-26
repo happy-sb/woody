@@ -13,11 +13,13 @@ import java.util.stream.Collectors;
  * @author jiangjibo
  * @version 1.0
  * @description: profiling events[interval] -c(clear) -s(selected) -l(list) --cpu cpuInterval
+ * -l(list)
+ * -ls(list selected)
+ * -c(clear)
+ * -s(select)
  * @since 2025/8/22
  */
 public class PECommandExecutor implements WoodyCommandExecutor {
-
-    public static final String COMMAND_NAME = "pe";
 
     private static final long DEFAULT_CPU_INTERVAL = 5_000_000L; // 5ms
     private static final long DEFAULT_WALL_INTERVAL = 50_000_000L; // 50ms
@@ -26,18 +28,20 @@ public class PECommandExecutor implements WoodyCommandExecutor {
 
     @Override
     public String commandName() {
-        return COMMAND_NAME;
+        return "pe";
     }
 
     @Override
     public boolean support(WoodyCommand command) {
-        return command.getEval().startsWith(COMMAND_NAME + " ");
+        return command.getEval().startsWith(commandName() + " ");
     }
 
     @Override
     public void executeInternal(WoodyCommand command) {
         String[] segments = command.getEval().split(" ");
 
+        int opCount = 0;
+        boolean clear = false, list = false, listSelected = false, select = false;
         long cpuInterval = 0, allocInterval = 0, wallInterval = 0, lockInterval = 0;
         for (int i = 0; i < segments.length; i++) {
             String segment = segments[i].trim();
@@ -48,34 +52,21 @@ public class PECommandExecutor implements WoodyCommandExecutor {
                     command.error("clear profiling events not support other arguments!");
                     return;
                 }
-                ProfilingManager.INSTANCE.clearIntervals();
-                command.result("clear profiling events success!");
-                return;
-            } else if (segment.equals("-s")) {
-                Map<String, Long> intervals = ProfilingManager.INSTANCE.getEventIntervals();
-                command.result(formatEventIntervals(intervals));
-                return;
+                opCount++;
+                clear = true;
+            } else if (segment.equals("-ls")) {
+                opCount++;
+                listSelected = true;
             } else if (segment.equals("-l")) {
                 if (i != segments.length - 1) {
                     command.error("list profiling events not support other arguments!");
                     return;
                 }
-                Set<String> supportEvents = AsyncProfiler.getInstance().getSupportEvents();
-                StringBuilder sb = new StringBuilder("[");
-                supportEvents.remove("wall");
-                sb.append("wall,");
-                if (supportEvents.remove("alloc")) {
-                    sb.append("alloc,");
-                }
-                if (supportEvents.remove("lock")) {
-                    sb.append("lock,");
-                }
-                if (!supportEvents.isEmpty()) {
-                    String cpuEvents = supportEvents.stream().collect(Collectors.joining(","));
-                    sb.append("cpu(").append(cpuEvents).append(")]");
-                }
-                command.result(sb.toString());
-                return;
+                opCount++;
+                list = true;
+            } else if (segment.equals("-s")) {
+                opCount++;
+                select = true;
             } else if (segment.equals("--cpu")) {
                 if (i == segments.length - 1) {
                     cpuInterval = DEFAULT_CPU_INTERVAL;
@@ -129,10 +120,49 @@ public class PECommandExecutor implements WoodyCommandExecutor {
                 return;
             }
         }
+        if (opCount != 1) {
+            command.error("invalid profiling event command!");
+            return;
+        }
+
+        if (clear) {
+            ProfilingManager.INSTANCE.clearIntervals();
+            command.result("clear profiling events success!");
+            return;
+        }
+
+        if (listSelected) {
+            Map<String, Long> intervals = ProfilingManager.INSTANCE.getEventIntervals();
+            command.result(formatEventIntervals(intervals));
+            return;
+        }
+
+        if (list) {
+            Set<String> supportEvents = AsyncProfiler.getInstance().getSupportEvents();
+            StringBuilder sb = new StringBuilder("[");
+            supportEvents.remove("wall");
+            sb.append("wall,");
+            if (supportEvents.remove("alloc")) {
+                sb.append("alloc,");
+            }
+            if (supportEvents.remove("lock")) {
+                sb.append("lock,");
+            }
+            if (!supportEvents.isEmpty()) {
+                String cpuEvents = supportEvents.stream().collect(Collectors.joining(","));
+                sb.append("cpu(").append(cpuEvents).append(")]");
+            }
+            command.result(sb.toString());
+            return;
+        }
+
+        if (!select) {
+            return;
+        }
 
         ProfilingManager.INSTANCE.setEventInterval(cpuInterval, wallInterval, lockInterval, allocInterval);
 
-        command.result("set profiling event success:" + formatEventIntervals(ProfilingManager.INSTANCE.getEventIntervals()));
+        command.result("select profiling event success:" + formatEventIntervals(ProfilingManager.INSTANCE.getEventIntervals()));
     }
 
     private String formatEventIntervals(Map<String, Long> eventIntervals) {

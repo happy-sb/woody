@@ -1,14 +1,12 @@
 package happy2b.woody.core.flame.resource.transform;
 
-import happy2b.woody.core.flame.resource.ResourceMethod;
-import happy2b.woody.core.flame.core.ResourceMethodManager;
-import happy2b.woody.core.tool.AGCTPredicate;
 import happy2b.woody.common.api.id.IdGenerator;
 import happy2b.woody.common.api.id.ParametricIdGenerator;
 import happy2b.woody.common.utils.MethodUtil;
+import happy2b.woody.core.flame.core.ResourceMethodManager;
+import happy2b.woody.core.flame.resource.ResourceMethod;
+import happy2b.woody.core.tool.AGCTPredicate;
 import org.objectweb.asm.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.reflect.Method;
@@ -25,14 +23,12 @@ import static org.objectweb.asm.Opcodes.*;
  */
 public class ResourceMethodTransformer implements ClassFileTransformer {
 
-    private static final Logger log = LoggerFactory.getLogger(ResourceMethodTransformer.class);
-
     @Override
     public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classfileBuffer) {
         if (classBeingRedefined == null) {
             return null;
         }
-        if (!AGCTPredicate.acceptTracing(loader, className)) {
+        if (!acceptTracing(loader, className)) {
             return null;
         }
 
@@ -49,6 +45,10 @@ public class ResourceMethodTransformer implements ClassFileTransformer {
         }, ClassReader.EXPAND_FRAMES);
         return writer.toByteArray();
 
+    }
+
+    private boolean acceptTracing(ClassLoader classLoader, String className) {
+        return classLoader != null && ResourceMethodManager.INSTANCE.tracingMethods.contains(className);
     }
 
     public static class TracingMethodVisitor extends MethodVisitor {
@@ -90,7 +90,7 @@ public class ResourceMethodTransformer implements ClassFileTransformer {
 
             int order = includeMethod.getIdGenerator().getOrder();
             mv.visitLdcInsn(order);
-            IdGenerator idGenerator = ResourceMethodManager.INSTANCE.ID_GENERATORS[order];
+            IdGenerator idGenerator = ResourceMethodManager.INSTANCE.idGenerators[order];
             if (idGenerator instanceof ParametricIdGenerator) {
                 if (includeMethod.getMethod().getParameterTypes().length == 0) {
                     throw new IllegalStateException("method " + includeMethod.getMethodName() + " has no parameter");
@@ -113,7 +113,7 @@ public class ResourceMethodTransformer implements ClassFileTransformer {
         public void visitInsn(int opcode) {
             if ((opcode >= IRETURN && opcode <= RETURN) || opcode == ATHROW) {
                 mv.visitVarInsn(ALOAD, localVarIndex);
-                mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, PROFILING_TRACE_CLASS, FINISH_TRACE_METHOD.getName(), MethodUtil.getMethodDescriptor(FINISH_TRACE_METHOD), false);
+                mv.visitMethodInsn(INVOKEINTERFACE, PROFILING_TRACE_CLASS, FINISH_TRACE_METHOD.getName(), MethodUtil.getMethodDescriptor(FINISH_TRACE_METHOD), true);
                 mv.visitLabel(tryEndLabel);
             }
             super.visitInsn(opcode);
@@ -153,13 +153,13 @@ public class ResourceMethodTransformer implements ClassFileTransformer {
             mv.visitVarInsn(ASTORE, exceptionIndex);
 
             mv.visitVarInsn(ALOAD, localVarIndex);
-            mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, PROFILING_TRACE_CLASS, FINISH_TRACE_METHOD.getName(), MethodUtil.getMethodDescriptor(FINISH_TRACE_METHOD), false);
+            mv.visitMethodInsn(Opcodes.INVOKEINTERFACE, PROFILING_TRACE_CLASS, FINISH_TRACE_METHOD.getName(), MethodUtil.getMethodDescriptor(FINISH_TRACE_METHOD), true);
 
             mv.visitVarInsn(ALOAD, exceptionIndex);
             mv.visitInsn(ATHROW);
 
             mv.visitLabel(endLabel);
-            mv.visitLocalVariable("oneTrace", PROFILING_TRACE_CLASS_DESC, null, startLabel, endLabel, localVarIndex);
+            mv.visitLocalVariable("woodyTrace", PROFILING_TRACE_CLASS_DESC, null, startLabel, endLabel, localVarIndex);
 
             super.visitMaxs(Math.max(maxStack, localVarIndex + 2), maxLocals);
         }

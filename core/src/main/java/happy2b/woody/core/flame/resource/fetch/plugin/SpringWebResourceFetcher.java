@@ -1,6 +1,7 @@
 package happy2b.woody.core.flame.resource.fetch.plugin;
 
 import happy2b.woody.common.reflection.ReflectionUtils;
+import happy2b.woody.common.utils.AnsiLog;
 import happy2b.woody.core.flame.common.constant.ProfilingResourceType;
 import happy2b.woody.core.flame.resource.ResourceMethod;
 import happy2b.woody.core.flame.resource.fetch.ResourceFetcher;
@@ -15,8 +16,6 @@ import java.util.Map;
  * @since 2025/8/21
  */
 public class SpringWebResourceFetcher implements ResourceFetcher {
-
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(SpringWebResourceFetcher.class);
 
     public static final SpringWebResourceFetcher INSTANCE = new SpringWebResourceFetcher();
 
@@ -33,13 +32,13 @@ public class SpringWebResourceFetcher implements ResourceFetcher {
         try {
             Object[] instances = AsyncProfiler.getInstance().getInstances(clazz, 1);
             if (instances == null || instances.length == 0) {
-                log.error("Woody: Failed to fetch spring web '{}' instance!", clazz.getName());
+                AnsiLog.error("Woody: Failed to fetch spring web '{}' instance!", clazz.getName());
                 return;
             }
             Map<?, ?> handlerMethods = ReflectionUtils.invoke(instances[0], "getHandlerMethods");
             fetchSpringWebResources(handlerMethods);
         } catch (Throwable e) {
-            log.error("Woody: Fetch http profiling resource occur exception", e);
+            AnsiLog.error("Woody: Fetch http profiling resource occur exception", e);
         }
     }
 
@@ -62,7 +61,7 @@ public class SpringWebResourceFetcher implements ResourceFetcher {
                 extractHttpResources(path, method);
             }
         } catch (Exception e) {
-            log.error("One-Profiler: Fetch http profiling resource occur exception", e);
+            AnsiLog.error("One-Profiler: Fetch http profiling resource occur exception", e);
         }
     }
 

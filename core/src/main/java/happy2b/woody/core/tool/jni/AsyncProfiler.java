@@ -63,17 +63,26 @@ public class AsyncProfiler implements AsyncProfilerMXBean {
 
     private static File extractEmbeddedLib() {
         String platformTag = getPlatformTag();
-        String suffix = platformTag.contains("linux") ? "so" : "dylib";
-        String resourceName = "/libasyncProfiler." + suffix;
+        String resourceName, suffix;
+        if (platformTag.contains("x64")) {
+            resourceName = "/x64/libasyncProfiler.so";
+            suffix = ".so";
+        } else if (platformTag.contains("arm64")) {
+            resourceName = "/arm64/libasyncProfiler.so";
+            suffix = ".so";
+        } else if (platformTag.contains("mac")) {
+            resourceName = "/mac/libasyncProfiler.dylib";
+            suffix = ".dylib";
+        } else {
+            throw new IllegalStateException("Unsupported platform: " + platformTag);
+        }
         InputStream in = AsyncProfiler.class.getResourceAsStream(resourceName);
         if (in == null) {
             return null;
         }
 
         try {
-            String extractPath = System.getProperty("one.profiler.extractPath");
-            File file = File.createTempFile("libasyncProfiler-.", suffix,
-                    extractPath == null || extractPath.isEmpty() ? null : new File(extractPath));
+            File file = File.createTempFile("libasyncProfiler-.", suffix);
             try (FileOutputStream out = new FileOutputStream(file)) {
                 byte[] buf = new byte[32000];
                 for (int bytes; (bytes = in.read(buf)) >= 0; ) {

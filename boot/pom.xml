@@ -108,6 +108,16 @@
                                         <exclude>*-javadoc.jar</exclude>
                                     </excludes>
                                 </resource>
+                                <resource>
+                                    <directory>${project.basedir}/../spy/target</directory>
+                                    <includes>
+                                        <include>woody-spy-${project.version}.jar</include>
+                                    </includes>
+                                    <excludes>
+                                        <exclude>*-sources.jar</exclude>
+                                        <exclude>*-javadoc.jar</exclude>
+                                    </excludes>
+                                </resource>
                             </resources>
                         </configuration>
                     </execution>

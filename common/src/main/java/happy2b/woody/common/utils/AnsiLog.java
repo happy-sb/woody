@@ -4,7 +4,6 @@ import java.util.logging.Level;
 import java.util.regex.Matcher;
 
 /**
- *
  * <pre>
  * FINEST  -> TRACE
  * FINER   -> DEBUG
@@ -15,9 +14,8 @@ import java.util.regex.Matcher;
  * SEVERE  -> ERROR
  * </pre>
  *
- * @see org.slf4j.bridge.SLF4JBridgeHandler
  * @author hengyunabc 2017-05-03
- *
+ * @see org.slf4j.bridge.SLF4JBridgeHandler
  */
 public abstract class AnsiLog {
 
@@ -73,9 +71,9 @@ public abstract class AnsiLog {
     /**
      * set logger Level
      *
-     * @see Level
      * @param level
      * @return
+     * @see Level
      */
     public static Level level(Level level) {
         Level old = LEVEL;
@@ -261,6 +259,20 @@ public abstract class AnsiLog {
     public static void error(String format, Object... arguments) {
         if (canLog(Level.SEVERE)) {
             error(format(format, arguments));
+        }
+    }
+
+    public static void error(String format, Throwable t) {
+        if (canLog(Level.SEVERE)) {
+            error(format);
+            t.printStackTrace();
+        }
+    }
+
+    public static void error(Throwable t, String format, Object... arguments) {
+        if (canLog(Level.SEVERE)) {
+            error(format(format, arguments));
+            t.printStackTrace();
         }
     }
 

@@ -16,6 +16,12 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
+    <dependencies>
+        <dependency>
+            <groupId>happy2b</groupId>
+            <artifactId>woody-spy</artifactId>
+        </dependency>
+    </dependencies>
 
     <build>
         <plugins>

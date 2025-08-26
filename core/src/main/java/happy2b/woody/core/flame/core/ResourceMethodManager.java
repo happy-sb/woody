@@ -5,6 +5,7 @@ import happy2b.woody.core.flame.resource.ResourceMethod;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 /**
  * @author jiangjibo
@@ -15,26 +16,26 @@ public class ResourceMethodManager {
 
     public static ResourceMethodManager INSTANCE = new ResourceMethodManager();
 
-    private Set<Integer> GENERATOR_INDEXES = ConcurrentHashMap.newKeySet();
+    private Set<Integer> generatorIndexes = ConcurrentHashMap.newKeySet();
 
     public List<ResourceMethod> allProfilingIncludeMethods = new ArrayList<>();
-    public List<ResourceMethod> selectedProfilingIncludeMethods = new ArrayList<>();
+    public Set<ResourceMethod> selectedProfilingIncludeMethods = new HashSet<>();
 
-    public IdGenerator[] ID_GENERATORS = new IdGenerator[10];
-    public Set<String> TRACING_METHODS = ConcurrentHashMap.newKeySet();
+    public IdGenerator[] idGenerators = new IdGenerator[10];
+    public Set<String> tracingMethods = ConcurrentHashMap.newKeySet();
 
     private ResourceMethodManager() {
     }
 
     public void addProfilingIncludeMethod(ResourceMethod method) {
         allProfilingIncludeMethods.add(method);
-        TRACING_METHODS.add(method.getClazz().getName().replace(".", "/"));
+        tracingMethods.add(method.getClazz().getName().replace(".", "/"));
 
         int order = method.getIdGenerator().getOrder();
-        if (GENERATOR_INDEXES.contains(order)) {
+        if (generatorIndexes.contains(order)) {
             return;
         }
-        if (GENERATOR_INDEXES.size() == ID_GENERATORS.length) {
+        if (generatorIndexes.size() == idGenerators.length) {
             refreshIdGenerator();
         }
         addIdGenerator(method.getIdGenerator());
@@ -50,17 +51,17 @@ public class ResourceMethodManager {
     }
 
     private synchronized void refreshIdGenerator() {
-        IdGenerator[] generators = new IdGenerator[ID_GENERATORS.length * 2];
+        IdGenerator[] generators = new IdGenerator[idGenerators.length * 2];
         int i = 0;
-        for (IdGenerator idGenerator : ID_GENERATORS) {
+        for (IdGenerator idGenerator : idGenerators) {
             generators[i++] = idGenerator;
         }
-        ID_GENERATORS = generators;
+        idGenerators = generators;
     }
 
     private synchronized void addIdGenerator(IdGenerator idGenerator) {
-        if (GENERATOR_INDEXES.add(idGenerator.getOrder())) {
-            ID_GENERATORS[GENERATOR_INDEXES.size() - 1] = idGenerator;
+        if (generatorIndexes.add(idGenerator.getOrder())) {
+            idGenerators[generatorIndexes.size() - 1] = idGenerator;
         }
     }
 
@@ -108,8 +109,23 @@ public class ResourceMethodManager {
         selectedProfilingIncludeMethods.addAll(resourceMethods);
     }
 
-    public void clearSelectedResource() {
-        selectedProfilingIncludeMethods.clear();
+    public void deleteSelectedResources(String type) {
+        selectedProfilingIncludeMethods.removeIf(method -> method.getResourceType().equals(type));
+    }
+
+    public Set<String> getSelectedResourceTypes() {
+        return selectedProfilingIncludeMethods.stream().map(ResourceMethod::getResourceType).collect(Collectors.toSet());
+    }
+
+    public static void destroy() {
+        if (INSTANCE != null) {
+            INSTANCE.generatorIndexes = null;
+            INSTANCE.allProfilingIncludeMethods = null;
+            INSTANCE.selectedProfilingIncludeMethods = null;
+            INSTANCE.idGenerators = null;
+            INSTANCE.tracingMethods = null;
+            INSTANCE = null;
+        }
     }
 
 }

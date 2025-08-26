@@ -9,12 +9,8 @@ import java.lang.instrument.Instrumentation;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.security.CodeSource;
+import java.woody.SpyAPI;
 
-/**
- * 代理启动类
- *
- * @author vlinux on 15/5/19.
- */
 public class AgentBootstrap {
     private static final String WOODY_CORE_JAR = "woody-core.jar";
     private static final String WOODY_BOOTSTRAP = "happy2b.woody.core.server.WoodyBootstrap";
@@ -90,12 +86,12 @@ public class AgentBootstrap {
     private static synchronized void main(String args, final Instrumentation inst) {
         // 尝试判断woody是否已在运行，如果是的话，直接就退出
         try {
-//            Class.forName("java.woody.SpyAPI");
-//            if (SpyAPI.isInited()) {
-//                ps.println("woody server already stared, skip attach.");
-//                ps.flush();
-//                return;
-//            }
+            Class.forName("java.woody.SpyAPI");
+            if (SpyAPI.isInited()) {
+                ps.println("woody server already stared, skip attach.");
+                ps.flush();
+                return;
+            }
         } catch (Throwable e) {
             // ignore
         }

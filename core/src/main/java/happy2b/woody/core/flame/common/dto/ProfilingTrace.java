@@ -1,9 +1,12 @@
 package happy2b.woody.core.flame.common.dto;
 
+import happy2b.woody.common.api.NanoTimer;
+
+import java.woody.SpyAPI;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ProfilingTrace {
+public class ProfilingTrace implements SpyAPI.ITrace {
 
     private String resource;
     private String type;
@@ -13,19 +16,12 @@ public class ProfilingTrace {
     private long endTime;
     private List<ProfilingSpan> spanList = new ArrayList<>();
 
-    public static final ProfilingTrace NO_OP = new ProfilingTrace("NO_OP", null, null, 0) {
-        @Override
-        public void finish() {
-
-        }
-    };
-
     public ProfilingTrace(String resource, String type, String methodPath, Object traceId) {
         this.resource = resource;
         this.type = type;
         this.methodPath = methodPath;
         this.traceId = traceId;
-        this.startTime = System.nanoTime();
+        this.startTime = NanoTimer.INSTANCE.getNanoTime();
     }
 
     public ProfilingSpan startSpan(Object spanId, long startTime, String operationName) {
@@ -38,7 +34,7 @@ public class ProfilingTrace {
     }
 
     public void finish() {
-        this.endTime = System.nanoTime();
+        this.endTime = NanoTimer.INSTANCE.getNanoTime();;
     }
 
     public Object getTraceId() {

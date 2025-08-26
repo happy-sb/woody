@@ -49,12 +49,10 @@ public class Configure {
         this.serverPort = serverPort;
     }
 
-
-    public void setWoodyHomeDir(String woodyHomeDir) {
-        this.woodyHomeDir = woodyHomeDir;
-    }
-
     public String getWoodyHomeDir() {
+        if (woodyCore != null) {
+            woodyHomeDir = woodyCore.substring(0, woodyCore.lastIndexOf("/"));
+        }
         return woodyHomeDir;
     }
 

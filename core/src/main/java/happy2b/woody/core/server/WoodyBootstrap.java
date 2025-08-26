@@ -4,23 +4,29 @@ import happy2b.woody.common.api.WoodyCommand;
 import happy2b.woody.common.bytecode.InstrumentationUtils;
 import happy2b.woody.common.thread.AgentThreadFactory;
 import happy2b.woody.core.config.Configure;
+import happy2b.woody.core.flame.core.*;
+import happy2b.woody.core.tool.jni.AsyncProfiler;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
+import io.netty.handler.codec.LengthFieldPrepender;
 import io.netty.handler.codec.string.StringDecoder;
 import io.netty.handler.codec.string.StringEncoder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.lang.instrument.Instrumentation;
+import java.lang.reflect.Method;
+import java.security.CodeSource;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.jar.JarFile;
+import java.woody.SpyAPI;
 
 /**
  * @author jiangjibo
@@ -30,11 +36,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class WoodyBootstrap {
 
 
-    private static final Logger logger = LoggerFactory.getLogger(WoodyBootstrap.class);
-
     private static WoodyBootstrap bootstrapInstance;
 
 
+    private static final String WOODY_SPY_JAR = "woody-spy.jar";
     private File outputPath;
     private Configure configure;
 
@@ -49,6 +54,8 @@ public class WoodyBootstrap {
     private EventLoopGroup bossGroup;
     private EventLoopGroup workerGroup;
 
+    private Instrumentation instrumentation;
+
     private CountDownLatch latch = new CountDownLatch(1);
 
 
@@ -56,6 +63,7 @@ public class WoodyBootstrap {
         this.configure = configure;
         this.pid = configure.getJavaPid();
 
+        this.instrumentation = instrumentation;
         InstrumentationUtils.setInstrumentation(instrumentation);
 
         executorService = Executors.newCachedThreadPool(new ThreadFactory() {
@@ -64,13 +72,6 @@ public class WoodyBootstrap {
                 final Thread t = new Thread(r, "as-command-execute-daemon");
                 t.setDaemon(true);
                 return t;
-            }
-        });
-
-        shutdown = AgentThreadFactory.newAgentThread(AgentThreadFactory.AgentThread.SHUTDOWN_HOOK, new Runnable() {
-            @Override
-            public void run() {
-                WoodyBootstrap.this.destroy();
             }
         });
 
@@ -85,9 +86,19 @@ public class WoodyBootstrap {
             }
         }).start();
 
+        initSpy();
+
         latch.await();
 
+        shutdown = AgentThreadFactory.newAgentThread(AgentThreadFactory.AgentThread.SHUTDOWN_HOOK, new Runnable() {
+            @Override
+            public void run() {
+                WoodyBootstrap.this.destroy();
+            }
+        });
+
         Runtime.getRuntime().addShutdownHook(shutdown);
+
     }
 
     public static WoodyBootstrap getInstance() {
@@ -121,9 +132,12 @@ public class WoodyBootstrap {
                     .childHandler(new ChannelInitializer<SocketChannel>() {
                         @Override
                         protected void initChannel(SocketChannel ch) {
-                            ch.pipeline().addLast(new StringDecoder());
-                            ch.pipeline().addLast(new StringEncoder());
-                            ch.pipeline().addLast(new WoodyServerHandler());
+                            ChannelPipeline pipeline = ch.pipeline();
+                            pipeline.addLast(new LengthFieldBasedFrameDecoder(1024 * 1024, 0, 4, 0, 4));
+                            pipeline.addLast(new LengthFieldPrepender(4));
+                            pipeline.addLast(new StringDecoder());
+                            pipeline.addLast(new StringEncoder());
+                            pipeline.addLast(new WoodyServerHandler());
                         }
                     });
 
@@ -137,8 +151,40 @@ public class WoodyBootstrap {
             isBindRef.set(false);
             throw e;
         } finally {
-            bossGroup.shutdownGracefully().sync();
-            workerGroup.shutdownGracefully().sync();
+            if (bossGroup != null) {
+                bossGroup.shutdownGracefully().sync();
+            }
+            if (workerGroup != null) {
+                workerGroup.shutdownGracefully().sync();
+            }
+        }
+
+        try {
+            SpyAPI.init();
+        } catch (Throwable e) {
+            // ignore
+        }
+    }
+
+    private void initSpy() throws Throwable {
+        ClassLoader parent = ClassLoader.getSystemClassLoader().getParent();
+        Class<?> spyClass = null;
+        if (parent != null) {
+            try {
+                spyClass = parent.loadClass("java.woody.SpyAPI");
+            } catch (Throwable e) {
+                // ignore
+            }
+        }
+        if (spyClass == null) {
+            CodeSource codeSource = WoodyBootstrap.class.getProtectionDomain().getCodeSource();
+            if (codeSource != null) {
+                File woodyCoreJarFile = new File(codeSource.getLocation().toURI().getSchemeSpecificPart());
+                File spyJarFile = new File(woodyCoreJarFile.getParentFile(), WOODY_SPY_JAR);
+                instrumentation.appendToBootstrapClassLoaderSearch(new JarFile(spyJarFile));
+            } else {
+                throw new IllegalStateException("can not find " + WOODY_SPY_JAR);
+            }
         }
     }
 
@@ -148,26 +194,46 @@ public class WoodyBootstrap {
     }
 
     public void destroy() {
+        ProfilingManager.destroy();
+        ResourceClassManager.destroy();
+        ResourceFetcherManager.destroy();
+        ResourceMethodManager.destroy();
+        TraceManager.destroy();
+
+        cleanSpyReference();
+
         serverChannel.writeAndFlush("stop");
         executorService.shutdownNow();
         if (serverChannel != null) {
             serverChannel.close();
+            serverChannel = null;
         }
         if (bossGroup != null) {
             bossGroup.shutdownGracefully();
+            bossGroup = null;
         }
         if (workerGroup != null) {
             workerGroup.shutdownGracefully();
+            workerGroup = null;
         }
+        shutdown = null;
         bootstrapInstance = null;
+        executorService = null;
     }
 
-    public Channel getServerChannel() {
-        return serverChannel;
-    }
-
-    public void writeCommand(WoodyCommand command) {
-        serverChannel.writeAndFlush(WoodyServerHandler.JSON_ADAPTER.toJson(command));
+    private void cleanSpyReference() {
+        try {
+            SpyAPI.setNopSpy();
+            SpyAPI.destroy();
+        } catch (Throwable e) {
+        }
+        try {
+            Class<?> clazz = ClassLoader.getSystemClassLoader().loadClass("happy2b.woody.agent.AgentBootstrap");
+            Method method = clazz.getDeclaredMethod("resetWoodyClassLoader");
+            method.invoke(null);
+        } catch (Throwable e) {
+            // ignore
+        }
     }
 
     public String getWoodyHome() {

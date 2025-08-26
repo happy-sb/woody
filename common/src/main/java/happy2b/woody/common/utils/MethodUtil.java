@@ -1,17 +1,12 @@
 package happy2b.woody.common.utils;
 
 import happy2b.woody.common.reflection.ReflectionUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.List;
 
 public class MethodUtil {
-
-
-  private static final Logger log = LoggerFactory.getLogger(MethodUtil.class);
 
   public static String getMethodDescriptor(final Method method) {
     return getMethodDescriptor("", method);
@@ -87,7 +82,7 @@ public class MethodUtil {
     try {
       Object element = ReflectionUtils.get(target, field);
       if (Proxy.isProxyClass(element.getClass())) {
-        log.error("Can`t find target Method for JDK Proxy class {}", element.getClass().getName());
+        AnsiLog.error("Can`t find target Method for JDK Proxy class {}", element.getClass().getName());
         return null;
       }
       Class targetClass = element.getClass();
@@ -100,10 +95,10 @@ public class MethodUtil {
           return method;
         }
       }
-      log.error("Failed find target method {} with desc {} from class {}", methodName, desc, targetClass.getName());
+      AnsiLog.error("Failed find target method {} with desc {} from class {}", methodName, desc, targetClass.getName());
       return null;
     } catch (Exception e) {
-      log.error("Find transform target method for target {} field {} method {} desc {} occur exception!", target.getClass().getName(), field, methodName, desc);
+      AnsiLog.error("Find transform target method for target {} field {} method {} desc {} occur exception!", target.getClass().getName(), field, methodName, desc);
       return null;
     }
   }

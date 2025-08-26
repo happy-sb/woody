@@ -1,8 +1,7 @@
 package happy2b.woody.common.bytecode;
 
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import happy2b.woody.common.utils.AnsiLog;
 
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.Instrumentation;
@@ -14,7 +13,6 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class InstrumentationUtils {
-    private static final Logger logger = LoggerFactory.getLogger(InstrumentationUtils.class);
 
     private InstrumentationUtils() {
     }
@@ -37,7 +35,7 @@ public class InstrumentationUtils {
             inst.retransformClasses(classes);
             return true;
         } catch (UnmodifiableClassException e) {
-            logger.error("[One-Profiler]: RetransformClasses class error, classes:{}", classes, e);
+            AnsiLog.error("[One-Profiler]: RetransformClasses class error, classes:{}", classes, e);
             inst.removeTransformer(transformer);
             return false;
         }
@@ -54,7 +52,7 @@ public class InstrumentationUtils {
                 try {
                     inst.retransformClasses(clazz);
                 } catch (Throwable e) {
-                    logger.error("[One-Profiler]: RetransformClasses class error, class:{}", clazz.getName(), e);
+                    AnsiLog.error("[One-Profiler]: RetransformClasses class error, class:{}", clazz.getName(), e);
                 }
             }
         } finally {
@@ -69,7 +67,7 @@ public class InstrumentationUtils {
     public static List<Class> findClass(String ... classNames) {
         Instrumentation instrumentation = instrumentationRef.get();
         if (instrumentation == null) {
-            logger.error("[One-Profiler]: InstrumentationUtils: instrumentation is null");
+            AnsiLog.error("[One-Profiler]: InstrumentationUtils: instrumentation is null");
             return null;
         }
         Set<String> nameSet = new HashSet<>(classNames.length);

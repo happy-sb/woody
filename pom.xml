@@ -11,9 +11,10 @@
     <modules>
         <module>code-analyzing</module>
         <module>common</module>
-        <module>boot</module>
         <module>core</module>
         <module>agent</module>
+        <module>boot</module>
+        <module>spy</module>
     </modules>
 
     <properties>
@@ -28,11 +29,6 @@
         <dependencies>
             <dependency>
                 <groupId>happy2b</groupId>
-                <artifactId>profiler-api</artifactId>
-                <version>${project.versions}</version>
-            </dependency>
-            <dependency>
-                <groupId>happy2b</groupId>
                 <artifactId>woody-common</artifactId>
                 <version>${project.versions}</version>
             </dependency>
@@ -43,12 +39,13 @@
             </dependency>
             <dependency>
                 <groupId>happy2b</groupId>
-                <artifactId>flame-graph</artifactId>
+                <artifactId>woody-boot</artifactId>
                 <version>${project.versions}</version>
             </dependency>
+
             <dependency>
                 <groupId>happy2b</groupId>
-                <artifactId>woody-boot</artifactId>
+                <artifactId>woody-spy</artifactId>
                 <version>${project.versions}</version>
             </dependency>
 

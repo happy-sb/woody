@@ -1,10 +1,10 @@
 package happy2b.woody.core.flame.core;
 
 
-import happy2b.woody.common.api.WoodyCommand;
 import happy2b.woody.core.flame.common.constant.ProfilingEvent;
 import happy2b.woody.core.flame.common.constant.ProfilingResourceType;
 import happy2b.woody.core.flame.common.dto.ProfilingSample;
+import happy2b.woody.core.flame.common.dto.TraceSamples;
 import happy2b.woody.core.flame.resource.ResourceMethod;
 import happy2b.woody.core.tool.ProfilingSampleProcessor;
 import happy2b.woody.core.tool.jni.AsyncProfiler;
@@ -22,6 +22,10 @@ public class ProfilingManager {
     public static ProfilingManager INSTANCE = new ProfilingManager();
 
     private Map<String, Long> eventIntervals = new HashMap<>();
+
+    private TraceSamples traceSamples;
+
+    private boolean profiling = false;
 
     private ProfilingManager() {
     }
@@ -41,6 +45,14 @@ public class ProfilingManager {
         }
     }
 
+    public TraceSamples getTraceSamples() {
+        return traceSamples;
+    }
+
+    public void setTraceSamples(TraceSamples traceSamples) {
+        this.traceSamples = traceSamples;
+    }
+
     public Map<String, Long> getEventIntervals() {
         return eventIntervals;
     }
@@ -50,9 +62,16 @@ public class ProfilingManager {
     }
 
     public void startProfiling() throws Throwable {
+        Map<String, Set<ResourceMethod>> resources = ResourceFetcherManager.INSTANCE.listAllSelectedResources();
+
+        Set<Class> resourceClasses = resources.values().stream().flatMap(set -> set.stream()).map(resourceMethod -> resourceMethod.getClazz()).collect(Collectors.toSet());
+
+        ResourceClassManager.INSTANCE.retransformResourceClasses(resourceClasses);
+
+
         AsyncProfiler asyncProfiler = AsyncProfiler.getInstance();
 
-        Map<String, Set<ResourceMethod>> resources = ResourceFetcherManager.INSTANCE.listAllSelectedResources();
+        TraceManager.prepareTracing();
 
         ProfilingResourceType[] resourceTypes = resources.keySet().stream().map(resourceType -> ProfilingResourceType.ofType(resourceType))
                 .collect(Collectors.toList()).toArray(new ProfilingResourceType[0]);
@@ -62,14 +81,17 @@ public class ProfilingManager {
         }
         asyncProfiler.syncTidRsStackFrameHeightMap(tidRSFrameHeightMap);
 
+        TraceManager.startTracing();
+
         List<ResourceMethod> methods = new ArrayList<>();
         for (Set<ResourceMethod> value : resources.values()) {
             methods.addAll(value);
         }
         asyncProfiler.setResourceMethods(methods);
 
-        TraceManager.startTracing();
         asyncProfiler.start(eventIntervals);
+
+        profiling = true;
     }
 
     public List<ProfilingSample> stopProfiling() throws Throwable {
@@ -80,4 +102,19 @@ public class ProfilingManager {
         String[] split = dumpTraces.split(System.lineSeparator());
         return ProfilingSampleProcessor.parseProfilingSamples(split);
     }
+
+    public static void destroy() {
+        if (INSTANCE != null) {
+            if (INSTANCE.profiling) {
+                try {
+                    INSTANCE.stopProfiling();
+                } catch (Throwable e) {
+                }
+            }
+            INSTANCE.traceSamples = null;
+            INSTANCE.eventIntervals = null;
+            INSTANCE = null;
+        }
+    }
+
 }

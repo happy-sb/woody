@@ -28,6 +28,5 @@ public class StopCommandExecutor implements WoodyCommandExecutor {
         if (instance != null) {
             instance.destroy();
         }
-        command.result("stop success");
     }
 }

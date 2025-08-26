@@ -10,7 +10,7 @@ import happy2b.woody.core.flame.core.ResourceMethodManager;
  */
 public class AGCTPredicate {
     public static boolean acceptTracing(ClassLoader classLoader, String className) {
-        return classLoader != null && ResourceMethodManager.INSTANCE.TRACING_METHODS.contains(className);
+        return classLoader != null && ResourceMethodManager.INSTANCE.tracingMethods.contains(className);
     }
 
 }

@@ -8,6 +8,8 @@ import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
+import io.netty.handler.codec.LengthFieldPrepender;
 import io.netty.handler.codec.string.StringDecoder;
 import io.netty.handler.codec.string.StringEncoder;
 import org.jline.reader.LineReader;
@@ -96,6 +98,7 @@ public class WoodyClient {
                         }
                     }
                 } catch (Exception e) {
+                    System.err.println(msg);
                     e.printStackTrace();
                 }
             }
@@ -115,6 +118,8 @@ public class WoodyClient {
                     @Override
                     protected void initChannel(SocketChannel ch) {
                         ChannelPipeline pipeline = ch.pipeline();
+                        ch.pipeline().addLast(new LengthFieldBasedFrameDecoder(1024 * 1024, 0, 4, 0, 4));
+                        ch.pipeline().addLast(new LengthFieldPrepender(4));
                         pipeline.addLast(new StringDecoder());
                         pipeline.addLast(new StringEncoder());
                         pipeline.addLast(channelHandler);

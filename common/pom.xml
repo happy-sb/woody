@@ -24,12 +24,6 @@
             <version>0.152</version>
             <scope>provided</scope>
         </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>1.7.0</version>
-            <scope>provided</scope>
-        </dependency>
     </dependencies>
 
 </project>

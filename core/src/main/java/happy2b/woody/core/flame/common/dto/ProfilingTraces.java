@@ -5,21 +5,7 @@ import java.util.List;
 
 public class ProfilingTraces {
 
-  private List<ProfilingTrace> traceList = new ArrayList<>();
-
-  public ProfilingTraces renew() {
-    ProfilingTraces nt = new ProfilingTraces();
-    nt.traceList = new ArrayList<>();
-    if (!this.traceList.isEmpty()) {
-      int lastIndex = this.traceList.size() - 1;
-      ProfilingTrace lastTrace = this.traceList.get(lastIndex);
-      if (!lastTrace.isFinished()) {
-        nt.traceList.add(lastTrace);
-        this.traceList.remove(lastIndex);
-      }
-    }
-    return nt;
-  }
+  private List<ProfilingTrace> traceList = new ArrayList<>(64);
 
   public int getTraceNum() {
     return traceList.size();

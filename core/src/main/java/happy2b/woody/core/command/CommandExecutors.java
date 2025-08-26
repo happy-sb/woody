@@ -16,10 +16,10 @@ public abstract class CommandExecutors {
 
     static {
         WOODY_COMMANDS.add(new StopCommandExecutor());
-        WOODY_COMMANDS.add(new LSCommandExecutor());
-        WOODY_COMMANDS.add(new SSCommandExecutor());
+        WOODY_COMMANDS.add(new PRCommandExecutor());
         WOODY_COMMANDS.add(new PECommandExecutor());
-        WOODY_COMMANDS.add(new ProfilingCommandExecutor());
+        WOODY_COMMANDS.add(new PFCommandExecutor());
+        WOODY_COMMANDS.add(new TSCommandExecutor());
     }
 
     public static WoodyCommand execute(String cmdEval) {
@@ -31,7 +31,7 @@ public abstract class CommandExecutors {
                 return command;
             }
         }
-        command.error("不支持命令:" + cmdEval);
+        command.error("Unsupport command:" + cmdEval);
         return command;
     }
 
