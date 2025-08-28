@@ -13,6 +13,8 @@ Woody目前只支持jdk1.8+，支持mac，linux x64/arm64，低版本的jdk和�
 
 Woody能将业务请求和火焰图样本精确关联，可手动过滤不需要分析的业务入口，提高采样精准率，能将消耗降的很低。
 
+工程少量代码借鉴自arthas, 主要是agent,spy模块,不重复造轮子。
+
 ### 支持中间件列表:
   1. SpringMVC
   2. Dubbo
@@ -28,6 +30,34 @@ Woody能将业务请求和火焰图样本精确关联，可手动过滤不需要
 ```bash
   java -jar woody-boot-1.0.0.jar
 ```
+<img width="1000" height="406" alt="image" src="https://github.com/user-attachments/assets/3f065671-762e-4b30-a5f5-1e070ee03715" />
+
 然后选择对应的java进程编号，之后会进入命令交互界面。
+
+### 命令列表
+
+#### pr(profiling resource)
+可选参数:
+* -ls: list resource, 列举出当前应用的业务入口资源
+<img width="400" height="400" alt="image" src="https://github.com/user-attachments/assets/3dad9c98-ba42-4551-8208-0dd96730915c" />
+
+* -lt: list resource type, 列举出当前应用的所有业务资源类型
+<img width="400" height="132" alt="image" src="https://github.com/user-attachments/assets/cf12ca39-750b-46df-8f0f-51ee450ca013" />
+
+  
+* -lst: list selected resource types, 列举出已选择业务入口资源类型列表，没选时为[]
+<img width="400" height="138" alt="image" src="https://github.com/user-attachments/assets/2982c61e-7882-440a-906b-bc8020589450" />
+
+
+* -lss: list selected resource, 列举出已选择的业务入口资源
+<img width="400" height="260" alt="image" src="https://github.com/user-attachments/assets/d3d67881-683e-48c7-9c0a-f62b3904af74" />
+
+
+* -us: unselect, 移除已选中的业务入口资源
+* -s : select, 选择业务入口资源
+<img width="600" height="130" alt="image" src="https://github.com/user-attachments/assets/cf876f61-32e7-443f-9c6a-4469be4b0aa6" />
+
+* --type
+* --order
 
 
