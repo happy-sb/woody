@@ -46,6 +46,8 @@ Woody是一款专注于Java应用性能问题诊断的工具，旨在帮助开�
 
 ## 命令参考
 
+单横杠`-`表示命令操作，双横杠`--`表示参数，后续要接参数值
+
 ### pr（profiling resource）- 选择分析的业务入口
 
 用于指定需要分析的业务入口资源，可同时选择多种中间件的多个入口。
@@ -89,7 +91,7 @@ Woody是一款专注于Java应用性能问题诊断的工具，旨在帮助开�
 | --duration | 设置分析持续时间（秒），时间到后自动结束<br>（非必须，可通过stop命令提前结束） |
 | --file | 指定分析结束后生成的火焰图文件名<br>（默认生成在工具运行目录，多事件时会自动添加类型前缀）<br>（未指定时，采样结果将被缓存，供ts命令使用） |
 
-### ts（trace sample）- 检索分析样本
+### ts（trace sample）- 检索分析业务请求和样本，生成火焰图
 
 用于检索性能分析样本，支持通过traceId定位特定请求，或查看资源消耗TopN的请求。
 
@@ -103,8 +105,13 @@ Woody是一款专注于Java应用性能问题诊断的工具，旨在帮助开�
 | --id | 指定traceId（业务请求唯一标识），检索对应请求的样本 |
 | --top | 指定数量N，检索资源消耗最多的前N个请求ID<br>（将显示样本数量、起止时间等信息） |
 
-> traceId默认生成规则：1-Long.MAX_VALUE间的随机数<br>
-> 可通过修改`ParametricIdGenerator`实现自定义traceId生成逻辑（从业务上下文/参数/入口对象提取）
+> traceId默认生成规则：1~Long.MAX_VALUE间的随机数<br>
+> 可通过修改`ParametricIdGenerator`实现自定义traceId生成逻辑（从业务上下文/参数/入口对象提取），下个版本可通过命令及表达式从业务请求生成
+
+## 如何本地编译及调试
+本地编译: clone工程，执行 `mvn clean package -DskipTests` ，boot模块生成的jar包就是工具包，直接运行即可
+
+调试: 待分析应用添加远程debug参数和端口 `-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005 -Xdebug` ，woody工程直接远程关联debug即可
 
 ## 火焰图查看
 
